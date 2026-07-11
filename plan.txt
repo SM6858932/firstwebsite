@@ -1,0 +1,63 @@
+so i need website and content 
+
+i want you to check entire global internet and check which website performs better better page views and why?
+
+also i dont need clone website but i want you to find something interesting that no one used before and give me complete description how to create that kind website that never used in entire world. 
+
+i want combination of content worldwide where people once visit they definitely come to see the website 2 3 times in day
+
+also i want RSS global feed 
+
+ meet the  25K Daily pageview requirement. Ensure  
+
+this is my goal to achieve viewers on my page in 3 months 
+
+--
+
+The Content Plan: Auto-Fetching Viral News
+
+For a news site that changes content daily or weekly, you need a fully automated setup:
+
+
+Tool: Install WP RSS Aggregator Pro (if on WordPress) or build a custom feed fetcher using Python/RSS.
+
+Setup: Feed it RSS URLs of top national news portals (ensure you respect copyright/fair use by summarizing, not copying full articles).
+
+AI Rewriting (Optional but Recommended): Use the  Auto Robot plugin to automatically rewrite the fetched headlines and create a unique 2-line summary. This keeps Google from penalizing you for duplicate content.
+
+Owner-Posted Reels & Products (Not Users)
+
+Since you (the website owner) are the sole content creator for reels and products:
+
+For Reels (Short Videos): Create a custom "Video" post type. Use a video hosting service like Vimeo or Bunny.net (to save bandwidth costs) and embed them. Alternatively, just embed your own YouTube/Instagram Shorts directly onto the page. Since you post them, you control the narrative—post daily trending viral reels to keep users refreshing the page.
+
+For Products: Set up WooCommerce. List your own merchandise, digital downloads (e-books, courses), or dropshipping products. Since you aren't relying on users to list items, you have full quality control.
+
+Display Strategy: Place these Reels and Products in the sidebar or between news paragraphs so they get maximum exposure without annoying the user.
+
+Building Followers & Engagement (Even if Users Don't Post)
+
+Even if users don't upload content, they can still engage. Here is how to get followers without user-generated content:
+
+Push Notifications: Integrate OneSignal (free up to 30K subscribers). Add a "Subscribe to Breaking News" button. Every time you update the page with new viral news, send a push notification. This builds a loyal returning audience.
+
+Comment Section: Install Disqus or wpDiscuz and allow users to comment, like, and reply to your posts.
+
+Social Login: Use "Login with Google/Facebook" so users can easily create accounts to "save" or "bookmark" your posts and reels.
+
+Gamification: Add a simple points system (using myCRED plugin) where users earn points for commenting, sharing on social media, or visiting daily. This drastically increases time-on-site.
+
+
+Corrected "Perfect Plan" Summary
+
+Content: Automate using WP RSS Aggregator + AI Rewriting to post fresh viral news every few hours.
+
+Your Content: Create custom post types for your own Reels and Products, and feature them aggressively on the homepage.
+
+Retention: Use OneSignal for push notifications and Disqus for comments to turn 25K daily visitors into 25K daily returning follower
+
+Metric	Before (Step 0)	After (All 7 Steps)
+
+Daily Users	25,000	25,000
+
+Pageviews per User	2.5	4.0 (Step 1)

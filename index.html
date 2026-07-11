@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GlobalPulse — Your daily digest of trending news, viral reels, and curated products from around the world. Live RSS feeds from BBC, TechCrunch, CNBC and more.">
+  <meta name="keywords" content="news, trending, viral, global news, tech news, sports, entertainment, daily digest, RSS feed">
+  <meta name="author" content="GlobalPulse">
+  <meta name="theme-color" content="#0a0a0f">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="GlobalPulse — Live Global News & Trending Content">
+  <meta property="og:description" content="Your daily digest of trending news, viral reels, and curated products from around the world.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1504711434969-e33886168d13?w=1200&h=630&fit=crop">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GlobalPulse — Live Global News & Trending Content">
+  <meta name="twitter:description" content="Your daily digest of trending news, viral reels, and curated products from around the world.">
+
+  <title>GlobalPulse — Live Global News & Trending Content</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "GlobalPulse",
+    "url": "https://sm6858932.github.io/firstwebsite/",
+    "description": "Live global news aggregation with trending reels and curated products.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://sm6858932.github.io/firstwebsite/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <span class="loading-text">Loading GlobalPulse...</span>
+    </div>
+  </div>
+
+  <!-- Breaking News Ticker -->
+  <div class="breaking-ticker">
+    <div class="breaking-ticker-label">
+      <span class="dot"></span> BREAKING
+    </div>
+    <div class="ticker-track" id="ticker-track">
+      <span class="ticker-item">Loading latest headlines...</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo" id="logo">
+        <div class="logo-icon">🌍</div>
+        <span class="logo-text">GlobalPulse</span>
+      </a>
+
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="search" id="search-input" placeholder="Search news, topics, categories..." aria-label="Search articles" autocomplete="off">
+      </div>
+
+      <div class="header-actions">
+        <button class="header-btn theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
+        <button class="header-btn" id="notification-btn" aria-label="Notifications">
+          🔔
+          <span class="badge"></span>
+        </button>
+        <button class="header-btn" aria-label="Create post">➕</button>
+        <div class="user-avatar" id="user-avatar">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face" alt="User avatar">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Category Stories -->
+  <section class="stories-section" aria-label="Categories">
+    <div class="container">
+      <div class="stories-scroll">
+        <div class="story-item">
+          <div class="story-ring active">
+            <div class="story-avatar">🌍</div>
+            <span class="live-badge">LIVE</span>
+          </div>
+          <span class="story-name">Your feed</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-avatar">🌐</div>
+          </div>
+          <span class="story-name">World</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-avatar">💼</div>
+          </div>
+          <span class="story-name">Business</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-avatar">💻</div>
+          </div>
+          <span class="story-name">Technology</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-avatar">⚽</div>
+          </div>
+          <span class="story-name">Sports</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-avatar">🎬</div>
+          </div>
+          <span class="story-name">Entertainment</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-avatar">🏥</div>
+          </div>
+          <span class="story-name">Health</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-avatar">🔬</div>
+          </div>
+          <span class="story-name">Science</span>
+        </div>
+        <div class="story-item">
+          <div class="story-ring">
+            <div class="story-avatar">🧘</div>
+          </div>
+          <span class="story-name">Lifestyle</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="main-layout">
+      <!-- Feed Column -->
+      <div class="feed-column">
+        <!-- Category Filter Pills -->
+        <div class="category-filters" id="category-filters">
+          <button class="category-pill active" data-category="all">🔥 All</button>
+          <button class="category-pill" data-category="world">🌐 World</button>
+          <button class="category-pill" data-category="business">💼 Business</button>
+          <button class="category-pill" data-category="technology">💻 Technology</button>
+          <button class="category-pill" data-category="sports">⚽ Sports</button>
+          <button class="category-pill" data-category="entertainment">🎬 Entertainment</button>
+          <button class="category-pill" data-category="health">🏥 Health</button>
+          <button class="category-pill" data-category="science">🔬 Science</button>
+        </div>
+
+        <!-- News Section -->
+        <section aria-label="Latest News">
+          <div class="section-header">
+            <h1 class="section-title">
+              <span class="icon">📰</span>
+              <span class="highlight">Trending</span> Now
+            </h1>
+            <div class="section-nav">
+              <button class="section-nav-btn active" id="sort-latest">Latest</button>
+              <button class="section-nav-btn" id="sort-popular">Popular</button>
+            </div>
+          </div>
+
+          <div class="news-grid" id="news-grid">
+            <!-- Populated by JS -->
+          </div>
+
+          <div style="text-align: center; margin-top: 2rem;">
+            <button class="push-cta-btn" id="load-more-btn" style="display: none;">Load More Stories</button>
+          </div>
+        </section>
+
+        <!-- Reels Section -->
+        <section class="reels-section" aria-label="Trending Reels">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="icon">🎬</span>
+              <span class="highlight">Trending</span> Reels
+            </h2>
+            <div class="section-nav">
+              <button class="section-nav-btn active">For You</button>
+              <button class="section-nav-btn">Viral</button>
+            </div>
+          </div>
+
+          <div class="reels-scroll" id="reels-container">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- Ad Banner Section -->
+        <section class="ad-section" aria-label="Sponsored">
+          <div class="ad-banner-grid">
+            <div class="ad-banner">
+              <div class="ad-banner-icon" style="background: rgba(52, 168, 83, 0.15);">💰</div>
+              <div class="ad-banner-content">
+                <div class="ad-banner-label">Sponsored</div>
+                <div class="ad-banner-title">Earn More with Ads</div>
+                <div class="ad-banner-desc">Monetize your content your way</div>
+              </div>
+              <span class="ad-banner-cta primary">Learn More</span>
+            </div>
+            <div class="ad-banner">
+              <div class="ad-banner-icon" style="background: rgba(66, 133, 244, 0.15);">🚀</div>
+              <div class="ad-banner-content">
+                <div class="ad-banner-label">Sponsored</div>
+                <div class="ad-banner-title">Turn Your Passion into Profit</div>
+                <div class="ad-banner-desc">Start your journey today</div>
+              </div>
+              <span class="ad-banner-cta secondary">Get Started</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="products-section" aria-label="Deals & Products">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="icon">🛍️</span>
+              <span class="highlight">Hot</span> Deals
+            </h2>
+            <div class="section-nav">
+              <button class="section-nav-btn active">Featured</button>
+              <button class="section-nav-btn">New</button>
+              <button class="section-nav-btn">Best Sellers</button>
+            </div>
+          </div>
+
+          <div class="products-grid" id="products-grid">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <!-- Push Notification CTA -->
+        <div class="push-cta">
+          <div class="push-cta-icon">🔔</div>
+          <h3 class="push-cta-title">Never Miss Breaking News</h3>
+          <p class="push-cta-desc">Get instant alerts when major stories break. Be the first to know.</p>
+          <button class="push-cta-btn" id="push-cta-btn">🔔 Subscribe Now</button>
+        </div>
+
+        <!-- Trending Topics -->
+        <div class="trending-widget">
+          <div class="trending-widget-header">
+            <h3 class="trending-widget-title">🔥 Trending</h3>
+          </div>
+          <div id="trending-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Gamification Widget -->
+        <div class="gamification-widget">
+          <div class="gamification-header">
+            <h3 class="gamification-title">🏆 Your Score</h3>
+          </div>
+          <div class="points-display">
+            <div class="points-number" id="points-display">0</div>
+            <div class="points-label">Total Points</div>
+          </div>
+          <div class="streak-info" id="streak-display">🔥 0 day streak</div>
+          <div class="gamification-actions">
+            <div class="gamification-action">
+              <div class="gamification-action-left">📖 Read an article</div>
+              <span class="gamification-action-points">+5 pts</span>
+            </div>
+            <div class="gamification-action">
+              <div class="gamification-action-left">❤️ Like a story</div>
+              <span class="gamification-action-points">+2 pts</span>
+            </div>
+            <div class="gamification-action">
+              <div class="gamification-action-left">💬 Post a comment</div>
+              <span class="gamification-action-points">+15 pts</span>
+            </div>
+            <div class="gamification-action">
+              <div class="gamification-action-left">📤 Share article</div>
+              <span class="gamification-action-points">+20 pts</span>
+            </div>
+            <div class="gamification-action">
+              <div class="gamification-action-left">🔔 Enable notifications</div>
+              <span class="gamification-action-points">+20 pts</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <div class="logo-icon">🌍</div>
+            <span class="logo-text">GlobalPulse</span>
+          </div>
+          <p class="footer-brand-desc">Your daily digest of trending news, viral reels, and curated products from around the world. Powered by live RSS feeds from trusted global sources.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="Twitter">𝕏</a>
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="Instagram">📷</a>
+            <a href="#" aria-label="YouTube">▶️</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">Categories</h4>
+          <nav class="footer-links">
+            <a href="#" onclick="return false;">World News</a>
+            <a href="#" onclick="return false;">Business</a>
+            <a href="#" onclick="return false;">Technology</a>
+            <a href="#" onclick="return false;">Sports</a>
+            <a href="#" onclick="return false;">Entertainment</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Company</h4>
+          <nav class="footer-links">
+            <a href="#" onclick="return false;">About Us</a>
+            <a href="#" onclick="return false;">Contact</a>
+            <a href="#" onclick="return false;">Careers</a>
+            <a href="#" onclick="return false;">Advertise</a>
+            <a href="#" onclick="return false;">Press</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="footer-heading">Legal</h4>
+          <nav class="footer-links">
+            <a href="#" onclick="return false;">Privacy Policy</a>
+            <a href="#" onclick="return false;">Terms of Service</a>
+            <a href="#" onclick="return false;">Cookie Policy</a>
+            <a href="#" onclick="return false;">DMCA</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 GlobalPulse. All rights reserved. News sourced via RSS feeds from public sources.</span>
+        <span>Built with ❤️ for the global community</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Share Modal -->
+  <div class="modal-overlay" id="share-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Share Article</h3>
+        <button class="modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="share-options">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Back to Top -->
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top">↑</button>
+
+  <!-- Scripts -->
+  <script src="rss-engine.js"></script>
+  <script src="engagement.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
