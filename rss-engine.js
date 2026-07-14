@@ -11,31 +11,49 @@ const RSSEngine = (() => {
   const CACHE_KEY = 'globalpulse_rss_cache';
   const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
-  // RSS feed sources categorized
+  // RSS feed sources categorized (International + Indian)
   const FEED_SOURCES = {
     world: [
       { url: 'https://feeds.bbci.co.uk/news/world/rss.xml', name: 'BBC World', icon: '🌐' },
       { url: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml', name: 'NY Times', icon: '📰' },
+      { url: 'https://feeds.feedburner.com/ndtvnews-world-news', name: 'NDTV World', icon: '🇮🇳' },
+      { url: 'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms', name: 'Times of India', icon: '🏛️' },
+      { url: 'https://www.thehindu.com/news/international/feeder/default.rss', name: 'The Hindu', icon: '📜' },
     ],
     business: [
       { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', name: 'BBC Business', icon: '💼' },
       { url: 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147', name: 'CNBC', icon: '📈' },
+      { url: 'https://economictimes.indiatimes.com/rssfeedstopstories.cms', name: 'Economic Times', icon: '💹' },
+      { url: 'https://feeds.feedburner.com/ndtvprofit-latest', name: 'NDTV Profit', icon: '📊' },
+      { url: 'https://www.livemint.com/rss/markets', name: 'Mint Markets', icon: '💰' },
     ],
     technology: [
       { url: 'https://feeds.feedburner.com/TechCrunch', name: 'TechCrunch', icon: '💻' },
       { url: 'https://www.theverge.com/rss/index.xml', name: 'The Verge', icon: '🔌' },
+      { url: 'https://feeds.feedburner.com/gadgets360-latest', name: 'Gadgets360', icon: '📱' },
+      { url: 'https://indianexpress.com/section/technology/feed/', name: 'Indian Express Tech', icon: '🖥️' },
     ],
     sports: [
       { url: 'https://feeds.bbci.co.uk/sport/rss.xml', name: 'BBC Sport', icon: '⚽' },
+      { url: 'https://feeds.feedburner.com/ndtvsports-latest', name: 'NDTV Sports', icon: '🏏' },
+      { url: 'https://timesofindia.indiatimes.com/rssfeeds/4719148.cms', name: 'TOI Sports', icon: '🏅' },
+      { url: 'https://www.cricbuzz.com/rss/cricket-news', name: 'Cricbuzz', icon: '🏏' },
     ],
     entertainment: [
       { url: 'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml', name: 'BBC Entertainment', icon: '🎬' },
+      { url: 'https://feeds.feedburner.com/ndtventertainment-latest', name: 'NDTV Entertainment', icon: '🎭' },
+      { url: 'https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms', name: 'TOI Entertainment', icon: '🎵' },
+      { url: 'https://indianexpress.com/section/entertainment/bollywood/feed/', name: 'IE Bollywood', icon: '🎞️' },
     ],
     health: [
       { url: 'https://feeds.bbci.co.uk/news/health/rss.xml', name: 'BBC Health', icon: '🏥' },
+      { url: 'https://feeds.feedburner.com/ndtvhealth-latest', name: 'NDTV Health', icon: '💊' },
+      { url: 'https://timesofindia.indiatimes.com/rssfeeds/3908999.cms', name: 'TOI Health', icon: '🩺' },
     ],
     science: [
       { url: 'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml', name: 'BBC Science', icon: '🔬' },
+      { url: 'https://feeds.feedburner.com/ndtvscience-latest', name: 'NDTV Science', icon: '🧬' },
+      { url: 'https://www.thehindu.com/sci-tech/science/feeder/default.rss', name: 'The Hindu Science', icon: '🔭' },
     ],
   };
 

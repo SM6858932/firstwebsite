@@ -1,31 +1,60 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="GlobalPulse — Your daily digest of trending news, viral reels, and curated products from around the world. Live RSS feeds from BBC, TechCrunch, CNBC and more.">
-  <meta name="keywords" content="news, trending, viral, global news, tech news, sports, entertainment, daily digest, RSS feed">
+  <meta name="description"
+    content="GlobalPulse — Your daily digest of trending news, viral reels, and curated products from around the world. Live RSS feeds from BBC, TechCrunch, CNBC and more.">
+  <meta name="keywords"
+    content="news, trending, viral, global news, tech news, sports, entertainment, daily digest, RSS feed">
   <meta name="author" content="GlobalPulse">
   <meta name="theme-color" content="#0a0a0f">
 
   <!-- Open Graph -->
   <meta property="og:title" content="GlobalPulse — Live Global News & Trending Content">
-  <meta property="og:description" content="Your daily digest of trending news, viral reels, and curated products from around the world.">
+  <meta property="og:description"
+    content="Your daily digest of trending news, viral reels, and curated products from around the world.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="https://images.unsplash.com/photo-1504711434969-e33886168d13?w=1200&h=630&fit=crop">
+  <meta property="og:image"
+    content="https://images.unsplash.com/photo-1504711434969-e33886168d13?w=1200&h=630&fit=crop">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GlobalPulse — Live Global News & Trending Content">
-  <meta name="twitter:description" content="Your daily digest of trending news, viral reels, and curated products from around the world.">
+  <meta name="twitter:description"
+    content="Your daily digest of trending news, viral reels, and curated products from around the world.">
 
   <title>GlobalPulse — Live Global News & Trending Content</title>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://firstwebsite-alpha-liart.vercel.app/">
+
+  <!-- OneSignal Push Notifications SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function() {
+      OneSignal.init({
+        appId: "YOUR_ONESIGNAL_APP_ID", // Configured by user
+        safari_web_id: "web.onesignal.auto.1764df75-01e4-4d87-9bb3-5e927efcf94f",
+        notifyButton: {
+          enable: false,
+        },
+      });
+    });
+  </script>
+
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3460526508675563"
+    crossorigin="anonymous"></script>
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -33,16 +62,17 @@
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "GlobalPulse",
-    "url": "https://sm6858932.github.io/firstwebsite/",
+    "url": "https://firstwebsite-alpha-liart.vercel.app/",
     "description": "Live global news aggregation with trending reels and curated products.",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://sm6858932.github.io/firstwebsite/?q={search_term_string}",
+      "target": "https://firstwebsite-alpha-liart.vercel.app/?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   }
   </script>
 </head>
+
 <body>
   <!-- Loading Overlay -->
   <div id="loading-overlay" class="loading-overlay">
@@ -72,18 +102,57 @@
 
       <div class="search-bar">
         <span class="search-icon">🔍</span>
-        <input type="search" id="search-input" placeholder="Search news, topics, categories..." aria-label="Search articles" autocomplete="off">
+        <input type="search" id="search-input" placeholder="Search news, topics, categories..."
+          aria-label="Search articles" autocomplete="off">
       </div>
 
       <div class="header-actions">
         <button class="header-btn theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
-        <button class="header-btn" id="notification-btn" aria-label="Notifications">
-          🔔
-          <span class="badge"></span>
-        </button>
-        <button class="header-btn" aria-label="Create post">➕</button>
-        <div class="user-avatar" id="user-avatar">
-          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face" alt="User avatar">
+        
+        <div class="header-action-wrapper" style="position: relative; display: inline-block;">
+          <button class="header-btn" id="notification-btn" aria-label="Notifications">
+            🔔
+            <span class="badge" id="notification-badge" style="display: none;"></span>
+          </button>
+          
+          <!-- Notification Dropdown Panel -->
+          <div class="dropdown-panel" id="notification-dropdown">
+            <div class="dropdown-header">
+              <h3>Notifications</h3>
+              <button class="dropdown-clear-btn" id="clear-notifications-btn">Clear All</button>
+            </div>
+            <div class="dropdown-body" id="notification-list">
+              <div class="dropdown-empty-state">No new notifications</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="header-btn" id="create-post-btn" aria-label="Create post">➕</button>
+        
+        <div class="header-action-wrapper" style="position: relative; display: inline-block;">
+          <div class="user-avatar" id="user-avatar" role="button" aria-haspopup="true" aria-expanded="false" aria-label="User Profile">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face"
+              alt="User avatar">
+          </div>
+          
+          <!-- Profile Dropdown Menu -->
+          <div class="dropdown-panel" id="profile-dropdown">
+            <div class="profile-dropdown-header">
+              <div class="profile-dropdown-avatar" id="profile-dropdown-avatar">👤</div>
+              <div class="profile-dropdown-info">
+                <div class="profile-name" id="dropdown-profile-name">Guest User</div>
+                <div class="profile-email" id="dropdown-profile-email">Sign in to save points</div>
+              </div>
+            </div>
+            <div class="profile-dropdown-points">
+              <div class="points-val" id="dropdown-points-val">0</div>
+              <div class="points-lbl">Earned Points</div>
+            </div>
+            <div class="dropdown-menu-list">
+              <button class="dropdown-menu-item" id="dropdown-login-btn">🔐 Sign In / Sign Up</button>
+              <button class="dropdown-menu-item danger" id="dropdown-logout-btn" style="display: none;">🚪 Sign Out</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -319,7 +388,8 @@
             <div class="logo-icon">🌍</div>
             <span class="logo-text">GlobalPulse</span>
           </div>
-          <p class="footer-brand-desc">Your daily digest of trending news, viral reels, and curated products from around the world. Powered by live RSS feeds from trusted global sources.</p>
+          <p class="footer-brand-desc">Your daily digest of trending news, viral reels, and curated products from around
+            the world. Powered by live RSS feeds from trusted global sources.</p>
           <div class="footer-social">
             <a href="#" aria-label="Twitter">𝕏</a>
             <a href="#" aria-label="Facebook">f</a>
@@ -377,6 +447,91 @@
     </div>
   </div>
 
+  <!-- Create Post Modal -->
+  <div class="modal-overlay" id="create-post-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Create News Post</h3>
+        <button class="modal-close" aria-label="Close">✕</button>
+      </div>
+      <form class="modal-form" id="create-post-form" onsubmit="return false;">
+        <div class="form-group">
+          <label for="post-title">Article Title</label>
+          <input type="text" id="post-title" required placeholder="Enter breaking news title...">
+        </div>
+        <div class="form-group">
+          <label for="post-summary">2-Line Summary</label>
+          <textarea id="post-summary" rows="2" required placeholder="Enter a brief 2-line summary..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="post-category">Category</label>
+          <select id="post-category" required>
+            <option value="world">World</option>
+            <option value="business">Business</option>
+            <option value="technology">Technology</option>
+            <option value="sports">Sports</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="health">Health</option>
+            <option value="science">Science</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="post-image">Image URL (Optional)</label>
+          <input type="url" id="post-image" placeholder="https://images.unsplash.com/photo-...">
+        </div>
+        <div class="form-group">
+          <label for="post-link">Original Source Link (Optional)</label>
+          <input type="url" id="post-link" placeholder="https://news-source.com/...">
+        </div>
+        <button type="submit" class="modal-submit-btn">Post Article & Earn +15 pts</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Authentication Modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="auth-modal-title">Sign In</h3>
+        <button class="modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login">Login</button>
+        <button class="auth-tab" id="tab-signup">Register</button>
+      </div>
+      
+      <!-- Login Form -->
+      <form class="modal-form auth-form" id="login-form" onsubmit="return false;">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" required placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="modal-submit-btn">🔐 Sign In</button>
+      </form>
+
+      <!-- Signup Form -->
+      <form class="modal-form auth-form" id="signup-form" style="display: none;" onsubmit="return false;">
+        <div class="form-group">
+          <label for="signup-name">Full Name</label>
+          <input type="text" id="signup-name" required placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Email Address</label>
+          <input type="email" id="signup-email" required placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" required placeholder="Choose a password (min 6 chars)">
+        </div>
+        <button type="submit" class="modal-submit-btn">🚀 Create Account</button>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
 
@@ -385,7 +540,9 @@
 
   <!-- Scripts -->
   <script src="rss-engine.js"></script>
+  <script src="auth.js"></script>
   <script src="engagement.js"></script>
   <script src="app.js"></script>
 </body>
+
 </html>

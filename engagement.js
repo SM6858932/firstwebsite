@@ -59,6 +59,7 @@ const Engagement = (() => {
     const newTotal = current + amount;
     setStorage(KEYS.points, newTotal);
     logAction('points_earned', { amount, reason, total: newTotal });
+    if (window.GPAuth) GPAuth.syncUserData();
     return newTotal;
   }
 
@@ -129,6 +130,7 @@ const Engagement = (() => {
     }
 
     setStorage(KEYS.bookmarks, bookmarks);
+    if (window.GPAuth) GPAuth.syncUserData();
     return isBookmarked;
   }
 
@@ -156,6 +158,7 @@ const Engagement = (() => {
     }
 
     setStorage(KEYS.likes, likes);
+    if (window.GPAuth) GPAuth.syncUserData();
     return isLiked;
   }
 
@@ -181,6 +184,7 @@ const Engagement = (() => {
     all[articleId].unshift(comment);
     setStorage(KEYS.comments, all);
     addPoints(POINTS.comment, 'Posted a comment');
+    if (window.GPAuth) GPAuth.syncUserData();
     return comment;
   }
 
@@ -194,12 +198,27 @@ const Engagement = (() => {
   }
 
   async function requestPushPermission() {
-    if (!isPushSupported()) return false;
+    // OneSignal integration (if SDK is loaded and configured)
+    if (window.OneSignal && typeof OneSignal.Notifications !== 'undefined') {
+      try {
+        await OneSignal.Notifications.requestPermission();
+        const granted = OneSignal.Notifications.permission;
+        if (granted) {
+          setStorage(KEYS.pushEnabled, true);
+          addPoints(POINTS.share, 'Enabled push notifications via OneSignal');
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.warn('[GlobalPulse] OneSignal error, falling back to native:', err);
+      }
+    }
 
+    // Fallback: native browser Notification API
+    if (!isPushSupported()) return false;
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       setStorage(KEYS.pushEnabled, true);
-      // Send welcome notification
       new Notification('🌍 GlobalPulse', {
         body: 'You\'re all set! We\'ll notify you about breaking news.',
         icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌍</text></svg>',

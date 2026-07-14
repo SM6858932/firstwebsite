@@ -15,6 +15,12 @@
     visibleCount: 9,
   };
 
+  // --- Notifications State ---
+  const notifications = [
+    { id: 1, icon: '🔥', title: 'Daily Streak!', message: 'You have started a daily visit streak. Keep it up!', time: 'Just now' },
+    { id: 2, icon: '🌍', title: 'Welcome to GlobalPulse', message: 'Read news, save bookmarks, and earn engagement points!', time: '1h ago' }
+  ];
+
   // --- Sample Reels Data ---
   const REELS_DATA = [
     {
@@ -107,6 +113,26 @@
     DOM.categoryFilters = document.getElementById('category-filters');
     DOM.themeToggle = document.getElementById('theme-toggle');
     DOM.notificationBtn = document.getElementById('notification-btn');
+    DOM.notificationBadge = document.getElementById('notification-badge');
+    DOM.notificationDropdown = document.getElementById('notification-dropdown');
+    DOM.clearNotificationsBtn = document.getElementById('clear-notifications-btn');
+    DOM.notificationList = document.getElementById('notification-list');
+    DOM.createPostBtn = document.getElementById('create-post-btn');
+    DOM.createPostModal = document.getElementById('create-post-modal');
+    DOM.createPostForm = document.getElementById('create-post-form');
+    DOM.userAvatar = document.getElementById('user-avatar');
+    DOM.profileDropdown = document.getElementById('profile-dropdown');
+    DOM.dropdownProfileName = document.getElementById('dropdown-profile-name');
+    DOM.dropdownProfileEmail = document.getElementById('dropdown-profile-email');
+    DOM.dropdownPointsVal = document.getElementById('dropdown-points-val');
+    DOM.dropdownLoginBtn = document.getElementById('dropdown-login-btn');
+    DOM.dropdownLogoutBtn = document.getElementById('dropdown-logout-btn');
+    DOM.authModal = document.getElementById('auth-modal');
+    DOM.authModalTitle = document.getElementById('auth-modal-title');
+    DOM.tabLogin = document.getElementById('tab-login');
+    DOM.tabSignup = document.getElementById('tab-signup');
+    DOM.loginForm = document.getElementById('login-form');
+    DOM.signupForm = document.getElementById('signup-form');
     DOM.pushCtaBtn = document.getElementById('push-cta-btn');
     DOM.loadMoreBtn = document.getElementById('load-more-btn');
     DOM.pointsDisplay = document.getElementById('points-display');
@@ -122,13 +148,19 @@
     cacheDom();
     setupTheme();
     setupEventListeners();
+    
+    // Sync initial auth state
+    const currentUser = window.GPAuth ? GPAuth.getCurrentUser() : null;
+    updateAuthUI(currentUser);
     updateEngagementUI();
+    renderNotifications();
 
     // Check daily streak
     const streakInfo = Engagement.checkAndUpdateStreak();
     if (streakInfo.isNewDay) {
       setTimeout(() => {
         showToast('🔥', 'Welcome Back!', `Day ${streakInfo.streak} streak! +${Engagement.POINTS.daily_visit + streakInfo.streak * Engagement.POINTS.streak_bonus} points`);
+        addNotification('🔥', 'Daily Streak!', `Welcome back! Day ${streakInfo.streak} streak active. +${Engagement.POINTS.daily_visit + streakInfo.streak * Engagement.POINTS.streak_bonus} pts`);
       }, 1500);
     }
 
@@ -145,13 +177,6 @@
       console.log('[App] Auto-refreshing feeds...');
       await loadArticles(true);
     }, 30 * 60 * 1000);
-
-    // Ask for push notification (after 10 seconds)
-    setTimeout(() => {
-      if (Engagement.isPushSupported() && !Engagement.isPushEnabled()) {
-        // Don't auto-ask, let user click the CTA button
-      }
-    }, 10000);
   }
 
   // --- Theme ---
@@ -165,6 +190,75 @@
     if (DOM.themeToggle) {
       DOM.themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
       DOM.themeToggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+    }
+  }
+
+  // --- Notifications System ---
+  function addNotification(icon, title, message) {
+    notifications.unshift({
+      id: Date.now(),
+      icon,
+      title,
+      message,
+      time: 'Just now'
+    });
+    renderNotifications();
+  }
+
+  function renderNotifications() {
+    if (!DOM.notificationList) return;
+    
+    if (notifications.length === 0) {
+      DOM.notificationList.innerHTML = '<div class="dropdown-empty-state">No new notifications</div>';
+      if (DOM.notificationBadge) DOM.notificationBadge.style.display = 'none';
+      return;
+    }
+
+    if (DOM.notificationBadge) {
+      DOM.notificationBadge.style.display = 'block';
+      DOM.notificationBadge.textContent = notifications.length;
+    }
+
+    DOM.notificationList.innerHTML = notifications.map(n => `
+      <div class="notification-item" data-id="${n.id}">
+        <div class="notification-icon">${n.icon}</div>
+        <div class="notification-content">
+          <div class="notification-title">${escapeHtml(n.title)}</div>
+          <div class="notification-message">${escapeHtml(n.message)}</div>
+          <div class="notification-time">${escapeHtml(n.time)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // --- Auth UI Sync ---
+  function updateAuthUI(user) {
+    if (user) {
+      if (DOM.dropdownProfileName) DOM.dropdownProfileName.textContent = user.name;
+      if (DOM.dropdownProfileEmail) DOM.dropdownProfileEmail.textContent = user.email;
+      if (DOM.dropdownLoginBtn) DOM.dropdownLoginBtn.style.display = 'none';
+      if (DOM.dropdownLogoutBtn) DOM.dropdownLogoutBtn.style.display = 'block';
+      
+      // Header profile avatar
+      if (DOM.userAvatar) {
+        DOM.userAvatar.innerHTML = `
+          <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--gradient-accent); color: white; font-weight: 700; font-size: var(--text-base);">
+            ${user.name.charAt(0).toUpperCase()}
+          </div>
+        `;
+      }
+    } else {
+      if (DOM.dropdownProfileName) DOM.dropdownProfileName.textContent = 'Guest User';
+      if (DOM.dropdownProfileEmail) DOM.dropdownProfileEmail.textContent = 'Sign in to save points';
+      if (DOM.dropdownLoginBtn) DOM.dropdownLoginBtn.style.display = 'block';
+      if (DOM.dropdownLogoutBtn) DOM.dropdownLogoutBtn.style.display = 'none';
+      
+      if (DOM.userAvatar) {
+        DOM.userAvatar.innerHTML = `
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face"
+            alt="User avatar">
+        `;
+      }
     }
   }
 
@@ -205,7 +299,7 @@
       });
     }
 
-    // Push notification CTA
+    // Push notification subscription
     if (DOM.pushCtaBtn) {
       DOM.pushCtaBtn.addEventListener('click', async () => {
         const enabled = await Engagement.requestPushPermission();
@@ -214,11 +308,12 @@
           DOM.pushCtaBtn.textContent = '✓ Subscribed';
           DOM.pushCtaBtn.disabled = true;
           updateEngagementUI();
+          addNotification('🔔', 'Notifications Enabled', 'You subscribed to push notifications (+20 pts).');
         }
       });
     }
 
-    // Load more
+    // Load more articles
     if (DOM.loadMoreBtn) {
       DOM.loadMoreBtn.addEventListener('click', () => {
         state.visibleCount += 6;
@@ -233,7 +328,7 @@
       });
     }
 
-    // Scroll handler for back-to-top
+    // Scroll progress listener for Back-to-Top
     let scrollTicking = false;
     window.addEventListener('scroll', () => {
       if (!scrollTicking) {
@@ -247,7 +342,207 @@
       }
     });
 
-    // Share modal close
+    // --- Dropdown Panel Toggling ---
+    
+    // Toggle Notifications
+    if (DOM.notificationBtn) {
+      DOM.notificationBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        DOM.profileDropdown.classList.remove('active');
+        DOM.notificationDropdown.classList.toggle('active');
+      });
+    }
+
+    // Clear Notifications
+    if (DOM.clearNotificationsBtn) {
+      DOM.clearNotificationsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notifications.length = 0;
+        renderNotifications();
+        showToast('🗑️', 'Notifications Cleared', 'All notifications cleared.');
+      });
+    }
+
+    // Toggle Profile Dropdown
+    if (DOM.userAvatar) {
+      DOM.userAvatar.addEventListener('click', (e) => {
+        e.stopPropagation();
+        DOM.notificationDropdown.classList.remove('active');
+        DOM.profileDropdown.classList.toggle('active');
+      });
+    }
+
+    // Close Dropdowns on Click Outside
+    document.addEventListener('click', (e) => {
+      if (DOM.notificationDropdown && !DOM.notificationDropdown.contains(e.target) && e.target !== DOM.notificationBtn) {
+        DOM.notificationDropdown.classList.remove('active');
+      }
+      if (DOM.profileDropdown && !DOM.profileDropdown.contains(e.target) && !DOM.userAvatar.contains(e.target)) {
+        DOM.profileDropdown.classList.remove('active');
+      }
+    });
+
+    // --- Modal Toggles ---
+
+    // Open/Close Create Post Modal
+    if (DOM.createPostBtn) {
+      DOM.createPostBtn.addEventListener('click', () => {
+        DOM.createPostModal.classList.add('active');
+      });
+    }
+
+    if (DOM.createPostModal) {
+      DOM.createPostModal.addEventListener('click', (e) => {
+        if (e.target === DOM.createPostModal || e.target.closest('.modal-close')) {
+          DOM.createPostModal.classList.remove('active');
+        }
+      });
+    }
+
+    // Submit Create Post Form
+    if (DOM.createPostForm) {
+      DOM.createPostForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const title = document.getElementById('post-title').value.trim();
+        const summary = document.getElementById('post-summary').value.trim();
+        const category = document.getElementById('post-category').value;
+        const image = document.getElementById('post-image').value.trim() || 'https://images.unsplash.com/photo-1504711434969-e33886168d13?w=600&h=400&fit=crop';
+        const link = document.getElementById('post-link').value.trim() || '#';
+
+        const newArticle = {
+          title,
+          summary,
+          category,
+          source: 'User Post',
+          sourceIcon: '✍️',
+          link,
+          image,
+          pubDate: new Date().toISOString(),
+          likes: 0,
+          comments: 0
+        };
+
+        // Add to state and render
+        state.articles.unshift(newArticle);
+        renderArticles();
+        renderBreakingTicker();
+
+        // Award points
+        Engagement.addPoints(15, 'Created a news post');
+        updateEngagementUI();
+        
+        // Success feedback
+        showToast('🚀', 'Post Created!', 'Your article was published successfully! +15 points');
+        addNotification('✍️', 'Post Created', `You published "${title.substring(0, 30)}..." (+15 pts)`);
+
+        // Reset and close
+        DOM.createPostForm.reset();
+        DOM.createPostModal.classList.remove('active');
+      });
+    }
+
+    // Open Auth Modal from Profile Dropdown or Widgets
+    if (DOM.dropdownLoginBtn) {
+      DOM.dropdownLoginBtn.addEventListener('click', () => {
+        DOM.profileDropdown.classList.remove('active');
+        DOM.authModal.classList.add('active');
+      });
+    }
+
+    if (DOM.authModal) {
+      DOM.authModal.addEventListener('click', (e) => {
+        if (e.target === DOM.authModal || e.target.closest('.modal-close')) {
+          DOM.authModal.classList.remove('active');
+        }
+      });
+    }
+
+    // Auth Tab Switching
+    if (DOM.tabLogin && DOM.tabSignup) {
+      DOM.tabLogin.addEventListener('click', () => {
+        DOM.tabSignup.classList.remove('active');
+        DOM.tabLogin.classList.add('active');
+        DOM.authModalTitle.textContent = 'Sign In';
+        DOM.signupForm.style.display = 'none';
+        DOM.loginForm.style.display = 'flex';
+      });
+
+      DOM.tabSignup.addEventListener('click', () => {
+        DOM.tabLogin.classList.remove('active');
+        DOM.tabSignup.classList.add('active');
+        DOM.authModalTitle.textContent = 'Register';
+        DOM.loginForm.style.display = 'none';
+        DOM.signupForm.style.display = 'flex';
+      });
+    }
+
+    // Submit Sign In / Login Form
+    if (DOM.loginForm) {
+      DOM.loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+          if (window.GPAuth) {
+            await GPAuth.login(email, password);
+            DOM.loginForm.reset();
+            DOM.authModal.classList.remove('active');
+          }
+        } catch (error) {
+          showToast('⚠️', 'Login Failed', error.message);
+        }
+      });
+    }
+
+    // Submit Sign Up / Registration Form
+    if (DOM.signupForm) {
+      DOM.signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('signup-name').value;
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+
+        try {
+          if (window.GPAuth) {
+            await GPAuth.register(name, email, password);
+            DOM.signupForm.reset();
+            DOM.authModal.classList.remove('active');
+          }
+        } catch (error) {
+          showToast('⚠️', 'Registration Failed', error.message);
+        }
+      });
+    }
+
+    // Logout
+    if (DOM.dropdownLogoutBtn) {
+      DOM.dropdownLogoutBtn.addEventListener('click', () => {
+        if (window.GPAuth) {
+          GPAuth.logout();
+          DOM.profileDropdown.classList.remove('active');
+        }
+      });
+    }
+
+    // --- Global Window Listeners ---
+
+    // Auth change listener
+    window.addEventListener('gp-auth-change', (e) => {
+      const user = e.detail.user;
+      updateAuthUI(user);
+      updateEngagementUI();
+      if (user) {
+        showToast('🔑', 'Welcome Back!', `Logged in as ${user.name}`);
+        addNotification('🔑', 'Session Started', `Welcome back, ${user.name}!`);
+      } else {
+        showToast('🚪', 'Signed Out', 'You have successfully signed out.');
+        addNotification('🚪', 'Session Ended', 'Logged out. Progress is saved locally.');
+      }
+    });
+
+    // Close Share Modal
     if (DOM.shareModal) {
       DOM.shareModal.addEventListener('click', (e) => {
         if (e.target === DOM.shareModal || e.target.closest('.modal-close')) {
@@ -256,10 +551,14 @@
       });
     }
 
-    // Keyboard shortcut: Escape to close modal
+    // Escape Key to Close Everything
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && DOM.shareModal) {
-        DOM.shareModal.classList.remove('active');
+      if (e.key === 'Escape') {
+        if (DOM.shareModal) DOM.shareModal.classList.remove('active');
+        if (DOM.createPostModal) DOM.createPostModal.classList.remove('active');
+        if (DOM.authModal) DOM.authModal.classList.remove('active');
+        if (DOM.notificationDropdown) DOM.notificationDropdown.classList.remove('active');
+        if (DOM.profileDropdown) DOM.profileDropdown.classList.remove('active');
       }
     });
   }
@@ -486,14 +785,32 @@
 
   // --- Update Engagement UI ---
   function updateEngagementUI() {
-    if (DOM.pointsDisplay) {
-      const points = Engagement.getPoints();
-      DOM.pointsDisplay.textContent = formatCount(points);
-    }
+    const isLoggedIn = window.GPAuth && !!GPAuth.getCurrentUser();
+    const points = Engagement.getPoints();
+    const streak = Engagement.checkAndUpdateStreak();
 
-    if (DOM.streakDisplay) {
-      const streak = Engagement.checkAndUpdateStreak();
-      DOM.streakDisplay.textContent = `🔥 ${streak.streak} day streak`;
+    if (isLoggedIn) {
+      if (DOM.pointsDisplay) {
+        DOM.pointsDisplay.innerHTML = `<div class="points-number" id="points-display">${formatCount(points)}</div>`;
+      }
+      if (DOM.streakDisplay) {
+        DOM.streakDisplay.innerHTML = `🔥 ${streak.streak} day streak`;
+        DOM.streakDisplay.style.color = '';
+      }
+      if (DOM.dropdownPointsVal) {
+        DOM.dropdownPointsVal.textContent = formatCount(points);
+      }
+    } else {
+      if (DOM.pointsDisplay) {
+        DOM.pointsDisplay.innerHTML = `<span style="font-size: var(--text-lg); font-weight: 700; color: var(--text-muted);">🔒 Locked</span><div style="font-size: var(--text-xs); color: var(--text-muted); margin-top: 4px;">Sign in to see points</div>`;
+      }
+      if (DOM.streakDisplay) {
+        DOM.streakDisplay.innerHTML = `<a href="#" onclick="App.openAuthModal(); return false;" style="color: var(--accent-primary); text-decoration: underline; cursor: pointer;">Sign in to start streak</a>`;
+        DOM.streakDisplay.style.color = 'var(--accent-primary)';
+      }
+      if (DOM.dropdownPointsVal) {
+        DOM.dropdownPointsVal.textContent = '🔒';
+      }
     }
 
     if (DOM.pushCtaBtn && Engagement.isPushEnabled()) {
@@ -570,29 +887,31 @@
     // Try native share first
     Engagement.shareArticle(article).then(result => {
       if (!result.success && DOM.shareModal) {
-        // Show modal with share options
         const optionsContainer = DOM.shareModal.querySelector('.share-options');
         if (optionsContainer) {
-          optionsContainer.innerHTML = ['twitter', 'facebook', 'whatsapp', 'copy'].map(platform => {
-            const icons = {
-              twitter: '𝕏',
-              facebook: 'f',
-              whatsapp: '📱',
-              copy: '🔗',
-            };
-            const labels = {
-              twitter: 'Twitter',
-              facebook: 'Facebook',
-              whatsapp: 'WhatsApp',
-              copy: 'Copy Link',
-            };
-            return `
-              <button class="share-option" onclick="App.openShareLink('${platform}', ${articleIndex})">
-                <div class="share-option-icon ${platform}">${icons[platform]}</div>
-                <span class="share-option-label">${labels[platform]}</span>
-              </button>
-            `;
-          }).join('');
+          const platforms = ['twitter', 'facebook', 'whatsapp', 'telegram', 'linkedin', 'copy'];
+          const icons = {
+            twitter: '𝕏',
+            facebook: 'f',
+            whatsapp: '📱',
+            telegram: '✈️',
+            linkedin: 'in',
+            copy: '🔗',
+          };
+          const labels = {
+            twitter: 'Twitter',
+            facebook: 'Facebook',
+            whatsapp: 'WhatsApp',
+            telegram: 'Telegram',
+            linkedin: 'LinkedIn',
+            copy: 'Copy Link',
+          };
+          optionsContainer.innerHTML = platforms.map(platform => `
+            <button class="share-option" onclick="App.openShareLink('${platform}', ${articleIndex})">
+              <div class="share-option-icon ${platform}">${icons[platform]}</div>
+              <span class="share-option-label">${labels[platform]}</span>
+            </button>
+          `).join('');
         }
         DOM.shareModal.classList.add('active');
       }
@@ -657,6 +976,9 @@
     handleRead,
     openShareLink,
     showToast,
+    openAuthModal() {
+      if (DOM.authModal) DOM.authModal.classList.add('active');
+    }
   };
 
   // --- Boot ---
