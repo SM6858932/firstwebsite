@@ -94,9 +94,9 @@
   --z-toast: 500;
 
   /* Layout */
-  --max-width: 1280px;
+  --max-width: 1440px;
   --header-height: 64px;
-  --sidebar-width: 300px;
+  --sidebar-width: 320px;
 }
 
 /* --- Light Mode Override --- */
@@ -200,8 +200,11 @@ input, textarea, select {
 .container {
   width: 100%;
   max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 var(--space-4);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+  box-sizing: border-box;
 }
 
 .sr-only {
@@ -572,9 +575,17 @@ input, textarea, select {
 .main-layout {
   display: grid;
   grid-template-columns: 1fr var(--sidebar-width);
-  gap: var(--space-6);
+  gap: var(--space-8);
   padding: var(--space-6) 0 var(--space-16);
   align-items: start;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.feed-column {
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* ============================================
@@ -1119,6 +1130,10 @@ input, textarea, select {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-4));
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* Push Notification CTA */
