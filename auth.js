@@ -68,6 +68,29 @@ const GPAuth = (() => {
    */
   async function register(name, email, password) {
     email = email.toLowerCase().trim();
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error("Please enter a valid email address.");
+    }
+
+    // Disposable/temporary email domains check
+    const DISPOSABLE_DOMAINS = [
+      'mailinator.com',
+      'yopmail.com',
+      'tempmail.com',
+      'dispostable.com',
+      'guerrillamail.com',
+      'sharklasers.com',
+      '10minutemail.com',
+      'trashmail.com'
+    ];
+    const domain = email.substring(email.lastIndexOf("@") + 1);
+    if (DISPOSABLE_DOMAINS.includes(domain)) {
+      throw new Error("Registration using disposable email addresses is not allowed.");
+    }
+
     if (password.length < 6) {
       throw new Error("Password must be at least 6 characters long.");
     }
@@ -195,7 +218,7 @@ const GPAuth = (() => {
     window.dispatchEvent(event);
   }
 
-  return {
+  const authInstance = {
     getCurrentUser,
     register,
     login,
@@ -203,4 +226,10 @@ const GPAuth = (() => {
     syncUserData,
     isFirebaseEnabled
   };
+
+  if (typeof window !== 'undefined') {
+    window.GPAuth = authInstance;
+  }
+
+  return authInstance;
 })();

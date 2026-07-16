@@ -972,6 +972,54 @@ input, textarea, select {
   transform: translate(-50%, -50%) scale(1.1);
 }
 
+.reel-actions {
+  position: absolute;
+  right: var(--space-3);
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  z-index: 10;
+}
+
+.reel-action-btn {
+  background: rgba(10, 10, 15, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  width: 36px;
+  height: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: all var(--transition-fast);
+}
+
+.reel-action-btn:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  transform: scale(1.1);
+}
+
+.reel-action-btn .icon {
+  font-size: var(--text-base);
+  line-height: 1;
+}
+
+.reel-action-btn .count {
+  font-size: 9px;
+  font-weight: 600;
+  margin-top: 1px;
+  display: block;
+}
+
+.reel-action-btn.liked .icon {
+  color: #ff7675;
+}
+
 .reel-info {
   position: absolute;
   bottom: 0;

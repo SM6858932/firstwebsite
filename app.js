@@ -712,17 +712,37 @@
   function renderReels() {
     if (!DOM.reelsContainer) return;
 
-    DOM.reelsContainer.innerHTML = REELS_DATA.map(reel => `
-      <div class="reel-card" tabindex="0" role="button" aria-label="Play reel: ${escapeHtml(reel.title)}">
-        <img src="${reel.image}" alt="${escapeHtml(reel.title)}" loading="lazy">
-        <div class="reel-play-btn" aria-hidden="true">▶</div>
-        <span class="reel-badge">🎬 ${reel.duration}</span>
-        <div class="reel-info">
-          <div class="reel-title">${escapeHtml(reel.title)}</div>
-          <div class="reel-views">▶ ${reel.views} views</div>
+    DOM.reelsContainer.innerHTML = REELS_DATA.map((reel, idx) => {
+      const likesCount = Math.floor(Math.random() * 200) + 45;
+      const commentsCount = Math.floor(Math.random() * 50) + 12;
+
+      return `
+        <div class="reel-card" tabindex="0" role="button" aria-label="Play reel: ${escapeHtml(reel.title)}">
+          <img src="${reel.image}" alt="${escapeHtml(reel.title)}" loading="lazy">
+          <div class="reel-play-btn" aria-hidden="true">▶</div>
+          <span class="reel-badge">🎬 ${reel.duration}</span>
+          
+          <div class="reel-actions">
+            <button class="reel-action-btn like-btn" onclick="App.handleReelLike(this, event)" aria-label="Like reel">
+              <span class="icon">🤍</span>
+              <span class="count">${likesCount}</span>
+            </button>
+            <button class="reel-action-btn comment-btn" onclick="App.handleReelComment(this, event)" aria-label="Comment on reel">
+              <span class="icon">💬</span>
+              <span class="count">${commentsCount}</span>
+            </button>
+            <button class="reel-action-btn share-btn" onclick="App.handleReelShare(this, event)" aria-label="Share reel">
+              <span class="icon">📤</span>
+            </button>
+          </div>
+
+          <div class="reel-info">
+            <div class="reel-title">${escapeHtml(reel.title)}</div>
+            <div class="reel-views">▶ ${reel.views} views</div>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   // --- Render Products ---
@@ -966,6 +986,58 @@
     return num.toString();
   }
 
+  // --- Reel Engagement Handlers ---
+  function handleReelLike(btn, event) {
+    if (event) event.stopPropagation();
+    const icon = btn.querySelector('.icon');
+    const countSpan = btn.querySelector('.count');
+    const isLiked = btn.classList.contains('liked');
+
+    btn.classList.toggle('liked', !isLiked);
+    icon.textContent = !isLiked ? '❤️' : '🤍';
+    
+    let currentCount = parseInt(countSpan.textContent) || 0;
+    countSpan.textContent = !isLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
+
+    // Animate
+    icon.style.transform = 'scale(1.4)';
+    setTimeout(() => { icon.style.transform = ''; }, 200);
+
+    if (!isLiked) {
+      Engagement.addPoints(2, 'Liked a reel');
+      showToast('❤️', 'Reel Liked!', '+2 points');
+    } else {
+      Engagement.addPoints(-2, 'Unliked a reel');
+      showToast('🤍', 'Reel Unliked', '-2 points');
+    }
+    updateEngagementUI();
+  }
+
+  function handleReelComment(btn, event) {
+    if (event) event.stopPropagation();
+    showToast('💬', 'Reel Comments', 'Comment posted! +15 points');
+    
+    const countSpan = btn.querySelector('.count');
+    let currentCount = parseInt(countSpan.textContent) || 0;
+    countSpan.textContent = currentCount + 1;
+    
+    Engagement.addPoints(15, 'Commented on a reel');
+    updateEngagementUI();
+  }
+
+  function handleReelShare(btn, event) {
+    if (event) event.stopPropagation();
+    
+    navigator.clipboard.writeText(window.location.href + '#reel').then(() => {
+      showToast('🔗', 'Link Copied!', 'Reel share link copied! +20 points');
+    }).catch(() => {
+      showToast('📤', 'Reel Shared!', 'Reel shared! +20 points');
+    });
+
+    Engagement.addPoints(20, 'Shared a reel');
+    updateEngagementUI();
+  }
+
   // --- Expose public API ---
   window.App = {
     init,
@@ -976,6 +1048,9 @@
     handleRead,
     openShareLink,
     showToast,
+    handleReelLike,
+    handleReelComment,
+    handleReelShare,
     openAuthModal() {
       if (DOM.authModal) DOM.authModal.classList.add('active');
     }

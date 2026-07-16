@@ -338,6 +338,59 @@ const RSSEngine = (() => {
     }
   }
 
+  // --- Geolocation & Indian News Reordering ---
+  const COUNTRY_CACHE_KEY = 'globalpulse_user_country';
+
+  async function detectCountry() {
+    try {
+      const cachedCountry = localStorage.getItem(COUNTRY_CACHE_KEY);
+      if (cachedCountry) return cachedCountry;
+    } catch (e) {}
+
+    try {
+      // Use freeipapi.com as primary (HTTPS, free, fast)
+      const response = await fetch('https://freeipapi.com/api/json');
+      if (response.ok) {
+        const data = await response.json();
+        const country = data.countryCode || 'US';
+        try {
+          localStorage.setItem(COUNTRY_CACHE_KEY, country);
+        } catch (e) {}
+        return country;
+      }
+    } catch (e) {
+      console.warn('[RSSEngine] Failed primary country detection:', e.message);
+    }
+
+    try {
+      // Fallback to ipapi.co
+      const response = await fetch('https://ipapi.co/json/');
+      if (response.ok) {
+        const data = await response.json();
+        const country = data.country_code || 'US';
+        try {
+          localStorage.setItem(COUNTRY_CACHE_KEY, country);
+        } catch (e) {}
+        return country;
+      }
+    } catch (e) {
+      console.warn('[RSSEngine] Fallback country detection failed:', e.message);
+    }
+
+    return 'US';
+  }
+
+  function isIndianSource(article) {
+    const indianSources = [
+      'NDTV World', 'Times of India', 'The Hindu', 'Economic Times', 
+      'NDTV Profit', 'Mint Markets', 'Gadgets360', 'Indian Express Tech', 
+      'NDTV Sports', 'TOI Sports', 'Cricbuzz', 'NDTV Entertainment', 
+      'TOI Entertainment', 'IE Bollywood', 'NDTV Health', 'TOI Health', 
+      'NDTV Science', 'The Hindu Science'
+    ];
+    return article.sourceIcon === '🇮🇳' || indianSources.includes(article.source);
+  }
+
   // --- Public API ---
   return {
     FEED_SOURCES,
@@ -389,6 +442,20 @@ const RSSEngine = (() => {
 
       // Sort by date (newest first)
       articles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+      // Geolocation check and IP-based sorting:
+      // If user's country code is India (IN), bubble Indian news to the top
+      try {
+        const country = await detectCountry();
+        console.log(`[RSSEngine] User country detected: ${country}`);
+        if (country === 'IN') {
+          const indianArticles = articles.filter(isIndianSource);
+          const globalArticles = articles.filter(a => !isIndianSource(a));
+          articles = [...indianArticles, ...globalArticles];
+        }
+      } catch (e) {
+        console.warn('[RSSEngine] Error during geolocation sorting:', e.message);
+      }
 
       // Cache results
       setCache(articles);

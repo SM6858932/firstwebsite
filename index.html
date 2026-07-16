@@ -43,7 +43,7 @@
     window.OneSignal = window.OneSignal || [];
     OneSignal.push(function() {
       OneSignal.init({
-        appId: "YOUR_ONESIGNAL_APP_ID", // Configured by user
+        appId: "f90ff6c9-d9c1-427c-aeb7-5962e9d376b0", // Configured by user
         safari_web_id: "web.onesignal.auto.1764df75-01e4-4d87-9bb3-5e927efcf94f",
         notifyButton: {
           enable: false,
@@ -238,6 +238,25 @@
           <button class="category-pill" data-category="science">🔬 Science</button>
         </div>
 
+        <!-- Products Section -->
+        <section class="products-section" aria-label="Deals & Products">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="icon">🛍️</span>
+              <span class="highlight">Hot</span> Deals
+            </h2>
+            <div class="section-nav">
+              <button class="section-nav-btn active">Featured</button>
+              <button class="section-nav-btn">New</button>
+              <button class="section-nav-btn">Best Sellers</button>
+            </div>
+          </div>
+
+          <div class="products-grid" id="products-grid">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
         <!-- News Section -->
         <section aria-label="Latest News">
           <div class="section-header">
@@ -302,24 +321,7 @@
           </div>
         </section>
 
-        <!-- Products Section -->
-        <section class="products-section" aria-label="Deals & Products">
-          <div class="section-header">
-            <h2 class="section-title">
-              <span class="icon">🛍️</span>
-              <span class="highlight">Hot</span> Deals
-            </h2>
-            <div class="section-nav">
-              <button class="section-nav-btn active">Featured</button>
-              <button class="section-nav-btn">New</button>
-              <button class="section-nav-btn">Best Sellers</button>
-            </div>
-          </div>
 
-          <div class="products-grid" id="products-grid">
-            <!-- Populated by JS -->
-          </div>
-        </section>
       </div>
 
       <!-- Sidebar -->
