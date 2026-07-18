@@ -1068,27 +1068,36 @@ input, textarea, select {
    PRODUCTS SECTION
    ============================================ */
 .products-section {
-  margin-top: var(--space-10);
-  padding-top: var(--space-8);
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-8);
+  padding-top: var(--space-2);
+  border-top: none;
 }
 
 .products-grid {
-  display: grid;
+  display: flex;
   gap: var(--space-4);
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x mandatory;
+  padding: var(--space-2) 0;
   align-items: start;
+}
+
+.products-grid::-webkit-scrollbar {
+  display: none;
 }
 
 
 
 
 .product-card {
-  min-width: 260px;
-  max-width: 300px;
+  flex-shrink: 0;
+  width: 240px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   overflow: hidden;
   transition: transform var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
   cursor: pointer;
@@ -1104,7 +1113,7 @@ input, textarea, select {
 
 .product-card-image {
   position: relative;
-  height: 160px;
+  height: 130px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.03);
 }
@@ -1213,12 +1222,12 @@ input, textarea, select {
 .push-cta::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(from 0deg, transparent 0%, rgba(108, 92, 231, 0.05) 25%, transparent 50%);
-  animation: rotate-gradient 8s linear infinite;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top left, rgba(108, 92, 231, 0.15), transparent 70%);
+  pointer-events: none;
 }
 
 .push-cta > * {
@@ -1855,11 +1864,7 @@ input, textarea, select {
     height: 240px;
   }
 
-  .products-grid {
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
-  }
+  /* products-grid handles scrollable flex layout across viewports */
 
 
   .footer-grid {
@@ -1891,15 +1896,8 @@ input, textarea, select {
     gap: var(--space-3);
   }
 
-  .products-grid {
-    display: grid;
-    gap: var(--space-3);
-    grid-template-columns: 1fr;
-  }
-
-
   .product-card-image {
-    height: 140px;
+    height: 120px;
   }
 }
 
@@ -1911,7 +1909,7 @@ input, textarea, select {
   gap: var(--space-2);
   overflow-x: auto;
   padding: var(--space-2) 0;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
