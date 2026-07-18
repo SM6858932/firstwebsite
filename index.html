@@ -11,6 +11,9 @@
   <meta name="author" content="GlobalPulse">
   <meta name="theme-color" content="#0a0a0f">
 
+  <!-- Content Security Policy (Fix #15: XSS mitigation) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.onesignal.com https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https://api.rss2json.com https://freeipapi.com https://ipapi.co https://onesignal.com https://*.onesignal.com; font-src 'self' https://fonts.gstatic.com; frame-src https://pagead2.googlesyndication.com;">
+
   <!-- Open Graph -->
   <meta property="og:title" content="GlobalPulse — Live Global News & Trending Content">
   <meta property="og:description"
@@ -43,7 +46,9 @@
     window.OneSignal = window.OneSignal || [];
     OneSignal.push(function() {
       OneSignal.init({
-        appId: "f90ff6c9-d9c1-427c-aeb7-5962e9d376b0", // Configured by user
+        // NOTE: OneSignal App IDs are designed to be public (client-side).
+        // This is safe, but monitor your OneSignal dashboard for abuse/spam.
+        appId: "f90ff6c9-d9c1-427c-aeb7-5962e9d376b0",
         safari_web_id: "web.onesignal.auto.1764df75-01e4-4d87-9bb3-5e927efcf94f",
         notifyButton: {
           enable: false,
@@ -459,11 +464,11 @@
       <form class="modal-form" id="create-post-form" onsubmit="return false;">
         <div class="form-group">
           <label for="post-title">Article Title</label>
-          <input type="text" id="post-title" required placeholder="Enter breaking news title...">
+          <input type="text" id="post-title" required placeholder="Enter breaking news title..." maxlength="150">
         </div>
         <div class="form-group">
           <label for="post-summary">2-Line Summary</label>
-          <textarea id="post-summary" rows="2" required placeholder="Enter a brief 2-line summary..."></textarea>
+          <textarea id="post-summary" rows="2" required placeholder="Enter a brief 2-line summary..." maxlength="300"></textarea>
         </div>
         <div class="form-group">
           <label for="post-category">Category</label>
@@ -506,11 +511,11 @@
       <form class="modal-form auth-form" id="login-form" onsubmit="return false;">
         <div class="form-group">
           <label for="login-email">Email Address</label>
-          <input type="email" id="login-email" required placeholder="you@example.com">
+          <input type="email" id="login-email" required placeholder="you@example.com" maxlength="254">
         </div>
         <div class="form-group">
           <label for="login-password">Password</label>
-          <input type="password" id="login-password" required placeholder="••••••••">
+          <input type="password" id="login-password" required placeholder="••••••••" maxlength="128">
         </div>
         <button type="submit" class="modal-submit-btn">🔐 Sign In</button>
       </form>
@@ -519,15 +524,15 @@
       <form class="modal-form auth-form" id="signup-form" style="display: none;" onsubmit="return false;">
         <div class="form-group">
           <label for="signup-name">Full Name</label>
-          <input type="text" id="signup-name" required placeholder="John Doe">
+          <input type="text" id="signup-name" required placeholder="John Doe" maxlength="50">
         </div>
         <div class="form-group">
           <label for="signup-email">Email Address</label>
-          <input type="email" id="signup-email" required placeholder="you@example.com">
+          <input type="email" id="signup-email" required placeholder="you@example.com" maxlength="254">
         </div>
         <div class="form-group">
           <label for="signup-password">Password</label>
-          <input type="password" id="signup-password" required placeholder="Choose a password (min 6 chars)">
+          <input type="password" id="signup-password" required placeholder="Choose a password (min 6 chars)" maxlength="128">
         </div>
         <button type="submit" class="modal-submit-btn">🚀 Create Account</button>
       </form>

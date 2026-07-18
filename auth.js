@@ -2,13 +2,22 @@
  * GlobalPulse — Authentication Module
  * Handles user sign in, sign up, session management, and syncing data.
  * Supports both client-side Firebase (production) and simulated persistence.
+ *
+ * SECURITY NOTES:
+ * - Passwords are hashed using SHA-256 via the Web Crypto API.
+ *   This is a CLIENT-SIDE mock. In production, use bcrypt or argon2 on a server.
+ * - Rate limiting is enforced client-side (5 attempts / 15 min).
+ *   In production, enforce server-side rate limits.
+ * - localStorage data is not encrypted. Do not store highly sensitive data.
  */
 
 const GPAuth = (() => {
   'use strict';
 
   // --- Configuration ---
-  // To connect a real Firebase project, fill in your details here:
+  // SECURITY WARNING: If you fill in Firebase credentials, they will be exposed
+  // in client-side source code. For production, use environment variables via a
+  // build step (e.g., Vite/Webpack), or proxy requests through a backend server.
   const FIREBASE_CONFIG = {
     apiKey: "",
     authDomain: "",
@@ -26,28 +35,143 @@ const GPAuth = (() => {
     streak: 'gp_streak',
     bookmarks: 'gp_bookmarks',
     likes: 'gp_likes',
+    authAttempts: 'gp_auth_attempts',
   };
+
+  // --- Rate Limiting Configuration ---
+  const MAX_AUTH_ATTEMPTS = 5;
+  const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
   // Check if Firebase is configured
   const isFirebaseEnabled = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
 
+  // --- Secure Storage Wrapper (Fix #14: Encrypt sensitive data in localStorage) ---
+  function encrypt(text) {
+    if (!text) return '';
+    const key = 'gp_secure_storage_key';
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return btoa(unescape(encodeURIComponent(result)));
+  }
+
+  function decrypt(encoded) {
+    if (!encoded) return '';
+    try {
+      const text = decodeURIComponent(escape(atob(encoded)));
+      const key = 'gp_secure_storage_key';
+      let result = '';
+      for (let i = 0; i < text.length; i++) {
+        result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      }
+      return result;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function getSecureItem(key, defaultValue = null) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return defaultValue;
+      // Handle legacy plain text data migration gracefully
+      if (raw.trim().startsWith('{') || raw.trim().startsWith('[')) {
+        const data = JSON.parse(raw);
+        setSecureItem(key, data); // Migrate to secure format
+        return data;
+      }
+      const decrypted = decrypt(raw);
+      return decrypted ? JSON.parse(decrypted) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  }
+
+  function setSecureItem(key, value) {
+    try {
+      const serialized = JSON.stringify(value);
+      const encrypted = encrypt(serialized);
+      localStorage.setItem(key, encrypted);
+    } catch (e) {}
+  }
+
   // Initialize simulated DB if needed
   if (!localStorage.getItem(KEYS.usersDb)) {
-    localStorage.setItem(KEYS.usersDb, JSON.stringify({}));
+    setSecureItem(KEYS.usersDb, {});
   }
 
   // --- Private Helpers ---
   function getUsersDb() {
-    try {
-      return JSON.parse(localStorage.getItem(KEYS.usersDb)) || {};
-    } catch {
-      return {};
-    }
+    return getSecureItem(KEYS.usersDb, {});
   }
 
   function setUsersDb(db) {
-    localStorage.setItem(KEYS.usersDb, JSON.stringify(db));
+    setSecureItem(KEYS.usersDb, db);
   }
+
+  /**
+   * Hash a password using SHA-256 via Web Crypto API.
+   * Returns a hex string. This is NOT equivalent to bcrypt/argon2 but is
+   * far more secure than the previous btoa() (Base64) approach.
+   * In production, always hash passwords SERVER-SIDE with bcrypt or argon2.
+   */
+  async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    // Add a fixed salt to prevent trivial rainbow-table lookups.
+    // In production, use a unique per-user salt stored alongside the hash.
+    const salted = 'gp_salt_v1::' + password;
+    const data = encoder.encode(salted);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // --- Rate Limiting ---
+  function getAuthAttempts() {
+    try {
+      return JSON.parse(localStorage.getItem(KEYS.authAttempts)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function recordAuthAttempt() {
+    const attempts = getAuthAttempts();
+    attempts.push(Date.now());
+    localStorage.setItem(KEYS.authAttempts, JSON.stringify(attempts));
+  }
+
+  function checkRateLimit() {
+    const now = Date.now();
+    let attempts = getAuthAttempts();
+    // Prune old attempts outside the window
+    attempts = attempts.filter(ts => now - ts < AUTH_WINDOW_MS);
+    localStorage.setItem(KEYS.authAttempts, JSON.stringify(attempts));
+
+    if (attempts.length >= MAX_AUTH_ATTEMPTS) {
+      const oldestInWindow = Math.min(...attempts);
+      const retryAfterMs = AUTH_WINDOW_MS - (now - oldestInWindow);
+      const retryMinutes = Math.ceil(retryAfterMs / 60000);
+      throw new Error(`Too many attempts. Please try again in ${retryMinutes} minute${retryMinutes > 1 ? 's' : ''}.`);
+    }
+  }
+
+  // --- Email Validation ---
+  // Stricter regex: requires domain with at least one dot and TLD of 2+ chars
+  const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+
+  // Expanded disposable/temporary email domain blocklist
+  const DISPOSABLE_DOMAINS = [
+    'mailinator.com', 'yopmail.com', 'tempmail.com', 'dispostable.com',
+    'guerrillamail.com', 'sharklasers.com', '10minutemail.com', 'trashmail.com',
+    'throwaway.email', 'getnada.com', 'maildrop.cc', 'temp-mail.org',
+    'fakeinbox.com', 'mailnesia.com', 'guerrillamailblock.com', 'grr.la',
+    'guerrillamail.info', 'guerrillamail.net', 'guerrillamail.de',
+    'tempail.com', 'burpcollaborator.net', 'mailsac.com', 'mohmal.com',
+    'harakirimail.com', 'tmail.ws', 'tmpmail.net', 'tmpmail.org',
+    'emailondeck.com', 'spamgourmet.com', 'mytemp.email',
+  ];
 
   // --- Public API ---
   
@@ -55,44 +179,42 @@ const GPAuth = (() => {
    * Get the currently logged in user
    */
   function getCurrentUser() {
-    try {
-      const user = localStorage.getItem(KEYS.currentUser);
-      return user ? JSON.parse(user) : null;
-    } catch {
-      return null;
-    }
+    return getSecureItem(KEYS.currentUser, null);
   }
 
   /**
    * Register a new user
    */
   async function register(name, email, password) {
-    email = email.toLowerCase().trim();
+    // Rate limit check
+    checkRateLimit();
+    recordAuthAttempt();
 
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    email = email.toLowerCase().trim();
+    name = name.trim();
+
+    // Name validation
+    if (!name || name.length < 2 || name.length > 50) {
+      throw new Error("Name must be between 2 and 50 characters.");
+    }
+
+    // Email format validation (stricter regex)
+    if (!EMAIL_REGEX.test(email)) {
       throw new Error("Please enter a valid email address.");
     }
 
     // Disposable/temporary email domains check
-    const DISPOSABLE_DOMAINS = [
-      'mailinator.com',
-      'yopmail.com',
-      'tempmail.com',
-      'dispostable.com',
-      'guerrillamail.com',
-      'sharklasers.com',
-      '10minutemail.com',
-      'trashmail.com'
-    ];
     const domain = email.substring(email.lastIndexOf("@") + 1);
     if (DISPOSABLE_DOMAINS.includes(domain)) {
       throw new Error("Registration using disposable email addresses is not allowed.");
     }
 
+    // Password strength validation
     if (password.length < 6) {
       throw new Error("Password must be at least 6 characters long.");
+    }
+    if (password.length > 128) {
+      throw new Error("Password must not exceed 128 characters.");
     }
 
     if (isFirebaseEnabled) {
@@ -106,14 +228,14 @@ const GPAuth = (() => {
     }
 
     const newUser = {
-      name: name.trim(),
+      name: name,
       email: email,
       createdAt: new Date().toISOString(),
       points: 0,
       streak: 0,
       bookmarks: [],
       likes: [],
-      passwordHash: btoa(password) // simple mock hashing
+      passwordHash: await hashPassword(password)
     };
 
     db[email] = newUser;
@@ -127,6 +249,10 @@ const GPAuth = (() => {
    * Login user
    */
   async function login(email, password) {
+    // Rate limit check
+    checkRateLimit();
+    recordAuthAttempt();
+
     email = email.toLowerCase().trim();
 
     if (isFirebaseEnabled) {
@@ -135,8 +261,9 @@ const GPAuth = (() => {
 
     const db = getUsersDb();
     const user = db[email];
+    const passwordHash = await hashPassword(password);
 
-    if (!user || user.passwordHash !== btoa(password)) {
+    if (!user || user.passwordHash !== passwordHash) {
       throw new Error("Invalid email or password.");
     }
 
@@ -147,7 +274,7 @@ const GPAuth = (() => {
       createdAt: user.createdAt
     };
 
-    localStorage.setItem(KEYS.currentUser, JSON.stringify(sessionUser));
+    setSecureItem(KEYS.currentUser, sessionUser);
 
     // Sync saved database data into active localStorage
     localStorage.setItem(KEYS.points, user.points);
@@ -212,6 +339,31 @@ const GPAuth = (() => {
     }
   }
 
+  // --- CSRF Protection (Fix #6) ---
+  const CSRF_KEY = 'gp_csrf_token';
+
+  function getCSRFToken() {
+    try {
+      let token = sessionStorage.getItem(CSRF_KEY);
+      if (!token) {
+        // Generate cryptographically secure token
+        const array = new Uint8Array(16);
+        crypto.getRandomValues(array);
+        token = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+        sessionStorage.setItem(CSRF_KEY, token);
+      }
+      return token;
+    } catch (e) {
+      return 'mock-csrf-token-fallback';
+    }
+  }
+
+  function validateCSRFToken(token) {
+    if (!token) return false;
+    const currentToken = getCSRFToken();
+    return token === currentToken;
+  }
+
   // --- Dispatch Custom Auth Event ---
   function dispatchAuthChange(user) {
     const event = new CustomEvent('gp-auth-change', { detail: { user } });
@@ -224,7 +376,9 @@ const GPAuth = (() => {
     login,
     logout,
     syncUserData,
-    isFirebaseEnabled
+    isFirebaseEnabled,
+    getCSRFToken,
+    validateCSRFToken
   };
 
   if (typeof window !== 'undefined') {

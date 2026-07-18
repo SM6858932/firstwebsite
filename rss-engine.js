@@ -7,9 +7,9 @@
 const RSSEngine = (() => {
   // --- Configuration ---
   const CORS_PROXY = 'https://api.rss2json.com/v1/api.json';
-  const API_KEY = ''; // Free tier works without key (limited to 10 calls/sec)
   const CACHE_KEY = 'globalpulse_rss_cache';
   const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+  const GEO_CONSENT_KEY = 'globalpulse_geo_consent'; // User consent flag for geolocation
 
   // RSS feed sources categorized (International + Indian)
   const FEED_SOURCES = {
@@ -234,12 +234,20 @@ const RSSEngine = (() => {
 
   // --- Fetch a single feed ---
   async function fetchFeed(source, category) {
-    const url = `${CORS_PROXY}?rss_url=${encodeURIComponent(source.url)}${API_KEY ? '&api_key=' + API_KEY : ''}`;
+    const url = `${CORS_PROXY}?rss_url=${encodeURIComponent(source.url)}`;
 
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+
+      // Fix #16: Wrap JSON parsing in try-catch for malformed responses
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.warn(`[RSSEngine] JSON parse error for ${source.name}:`, parseError.message);
+        return [];
+      }
 
       if (data.status !== 'ok' || !data.items) return [];
 
@@ -339,9 +347,21 @@ const RSSEngine = (() => {
   }
 
   // --- Geolocation & Indian News Reordering ---
+  // Fix #9: Geolocation requires explicit user consent (GDPR/CCPA compliant).
+  // Call RSSEngine.setGeoConsent(true) after the user opts in.
   const COUNTRY_CACHE_KEY = 'globalpulse_user_country';
 
   async function detectCountry() {
+    // Check consent before making any IP-based geolocation request
+    try {
+      const consent = localStorage.getItem(GEO_CONSENT_KEY);
+      if (consent !== 'true') {
+        return 'US'; // Default: do not detect without consent
+      }
+    } catch (e) {
+      return 'US';
+    }
+
     try {
       const cachedCountry = localStorage.getItem(COUNTRY_CACHE_KEY);
       if (cachedCountry) return cachedCountry;
@@ -351,7 +371,8 @@ const RSSEngine = (() => {
       // Use freeipapi.com as primary (HTTPS, free, fast)
       const response = await fetch('https://freeipapi.com/api/json');
       if (response.ok) {
-        const data = await response.json();
+        let data;
+        try { data = await response.json(); } catch { return 'US'; }
         const country = data.countryCode || 'US';
         try {
           localStorage.setItem(COUNTRY_CACHE_KEY, country);
@@ -366,7 +387,8 @@ const RSSEngine = (() => {
       // Fallback to ipapi.co
       const response = await fetch('https://ipapi.co/json/');
       if (response.ok) {
-        const data = await response.json();
+        let data;
+        try { data = await response.json(); } catch { return 'US'; }
         const country = data.country_code || 'US';
         try {
           localStorage.setItem(COUNTRY_CACHE_KEY, country);
@@ -395,6 +417,23 @@ const RSSEngine = (() => {
   return {
     FEED_SOURCES,
     FALLBACK_ARTICLES,
+
+    /**
+     * Set geolocation consent (call after user explicitly agrees).
+     */
+    setGeoConsent(consented) {
+      try {
+        localStorage.setItem(GEO_CONSENT_KEY, consented ? 'true' : 'false');
+        if (!consented) localStorage.removeItem(COUNTRY_CACHE_KEY);
+      } catch (e) {}
+    },
+
+    /**
+     * Check if the user has given geolocation consent.
+     */
+    hasGeoConsent() {
+      try { return localStorage.getItem(GEO_CONSENT_KEY) === 'true'; } catch { return false; }
+    },
 
     /**
      * Fetch all feeds and return normalized, deduplicated articles.
