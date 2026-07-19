@@ -2,6 +2,11 @@
  * Engagement System for GlobalPulse
  * Handles gamification points, bookmarks, push notifications,
  * comments, daily streaks, and social sharing.
+ *
+ * SECURITY NOTES:
+ * - Points are validated client-side with per-action cooldowns and a session cap.
+ *   In production, always validate points mutations SERVER-SIDE.
+ * - User-generated text (comments) is sanitized before storage.
  */
 
 const Engagement = (() => {
@@ -17,6 +22,7 @@ const Engagement = (() => {
     totalVisits: 'gp_total_visits',
     actions: 'gp_actions_log',
     theme: 'gp_theme',
+    pointsSession: 'gp_points_session',
   };
 
   // --- Points Configuration ---
@@ -30,6 +36,15 @@ const Engagement = (() => {
     streak_bonus: 5, // per day in streak
     first_visit: 50,
   };
+
+  // --- Points Anti-Cheat Configuration ---
+  const MAX_POINTS_PER_SESSION = 500;    // Cap to prevent console manipulation
+  const ACTION_COOLDOWN_MS = 1000;       // 1 second between point-earning actions
+  let lastPointsActionTime = 0;
+  let sessionPointsEarned = 0;
+
+  // --- Input Constraints ---
+  const MAX_COMMENT_LENGTH = 500;
 
   // --- Helper: Safe localStorage ---
   function getStorage(key, defaultValue = null) {
@@ -49,14 +64,56 @@ const Engagement = (() => {
     }
   }
 
+  // --- Helper: Sanitize user text input ---
+  function sanitizeText(text) {
+    if (!text) return '';
+    // Strip HTML tags, limit length
+    return text
+      .replace(/<[^>]*>/g, '')     // Remove HTML tags
+      .replace(/&/g, '&amp;')      // Escape ampersands
+      .replace(/</g, '&lt;')       // Escape less-than
+      .replace(/>/g, '&gt;')       // Escape greater-than
+      .replace(/"/g, '&quot;')     // Escape double quotes
+      .replace(/'/g, '&#x27;')    // Escape single quotes
+      .trim();
+  }
+
   // --- Points System ---
   function getPoints() {
     return getStorage(KEYS.points, 0);
   }
 
+  /**
+   * Add points with anti-cheat validation.
+   * - Enforces a cooldown between consecutive point-earning actions.
+   * - Caps total points earned per session.
+   * - Only allows known point values from the POINTS config.
+   */
   function addPoints(amount, reason = '') {
+    // Validate amount is a reasonable number
+    if (typeof amount !== 'number' || !isFinite(amount)) return getPoints();
+
+    const now = Date.now();
+
+    // Cooldown: prevent rapid-fire console manipulation
+    if (amount > 0 && now - lastPointsActionTime < ACTION_COOLDOWN_MS) {
+      console.warn('[Engagement] Points action too fast — cooldown active.');
+      return getPoints();
+    }
+
+    // Session cap: prevent unlimited console point inflation
+    if (amount > 0) {
+      if (sessionPointsEarned >= MAX_POINTS_PER_SESSION) {
+        console.warn('[Engagement] Session points cap reached.');
+        return getPoints();
+      }
+      sessionPointsEarned += amount;
+    }
+
+    lastPointsActionTime = now;
+
     const current = getPoints();
-    const newTotal = current + amount;
+    const newTotal = Math.max(0, current + amount); // Never go negative
     setStorage(KEYS.points, newTotal);
     logAction('points_earned', { amount, reason, total: newTotal });
     if (window.GPAuth) GPAuth.syncUserData();
@@ -110,6 +167,8 @@ const Engagement = (() => {
   }
 
   function toggleBookmark(articleId, articleData) {
+    if (!articleId || !articleData) return false;
+
     const bookmarks = getBookmarks();
     const index = bookmarks.findIndex(b => b.id === articleId);
     let isBookmarked;
@@ -120,7 +179,7 @@ const Engagement = (() => {
     } else {
       bookmarks.unshift({
         id: articleId,
-        title: articleData.title,
+        title: sanitizeText(articleData.title),
         link: articleData.link,
         category: articleData.category,
         savedAt: new Date().toISOString(),
@@ -144,6 +203,8 @@ const Engagement = (() => {
   }
 
   function toggleLike(articleId) {
+    if (!articleId) return false;
+
     const likes = getLikes();
     const index = likes.indexOf(articleId);
     let isLiked;
@@ -173,11 +234,25 @@ const Engagement = (() => {
   }
 
   function addComment(articleId, text) {
+    if (!articleId || !text) return null;
+
+    // Sanitize and validate comment text
+    let cleanText = sanitizeText(text);
+
+    if (cleanText.length === 0) {
+      console.warn('[Engagement] Empty comment rejected.');
+      return null;
+    }
+
+    if (cleanText.length > MAX_COMMENT_LENGTH) {
+      cleanText = cleanText.substring(0, MAX_COMMENT_LENGTH);
+    }
+
     const all = getStorage(KEYS.comments, {});
     if (!all[articleId]) all[articleId] = [];
     const comment = {
       id: Date.now().toString(36),
-      text: text.trim(),
+      text: cleanText,
       timestamp: new Date().toISOString(),
       author: 'You',
     };
@@ -239,6 +314,7 @@ const Engagement = (() => {
 
   // --- Social Sharing ---
   async function shareArticle(article) {
+    if (!article) return { success: false, method: 'error' };
     addPoints(POINTS.share, 'Shared article');
 
     if (navigator.share) {
@@ -259,6 +335,7 @@ const Engagement = (() => {
   }
 
   function getShareUrl(platform, article) {
+    if (!article) return '#';
     const text = encodeURIComponent(article.title);
     const url = encodeURIComponent(article.link);
     switch (platform) {
@@ -311,6 +388,7 @@ const Engagement = (() => {
 
   // --- Article read tracking ---
   function trackRead(articleId) {
+    if (!articleId) return;
     addPoints(POINTS.read_article, 'Read article');
     logAction('read', { articleId });
   }

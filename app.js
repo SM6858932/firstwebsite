@@ -1,10 +1,27 @@
 /**
  * GlobalPulse — Main Application
  * Orchestrates RSS feeds, engagement, and UI rendering.
+ *
+ * SECURITY NOTES:
+ * - All inline onclick handlers replaced with addEventListener for XSS prevention.
+ * - User input is validated with maxlength limits and sanitized before rendering.
+ * - Article references use unique IDs, not array indices where possible.
+ * - setInterval is cleaned up on page unload to prevent memory leaks.
  */
 
 (function () {
   'use strict';
+
+  // --- Named Constants (Fix #18: no more magic numbers) ---
+  const INITIAL_VISIBLE_COUNT = 9;
+  const LOAD_MORE_INCREMENT = 6;
+  const AUTO_REFRESH_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+  const BACK_TO_TOP_THRESHOLD = 500;
+  const SEARCH_DEBOUNCE_MS = 300;
+  const ANIMATION_DURATION_MS = 200;
+  const TOAST_DEFAULT_DURATION_MS = 4000;
+  const POST_TITLE_MAX_LENGTH = 150;
+  const POST_SUMMARY_MAX_LENGTH = 300;
 
   // --- State ---
   const state = {
@@ -12,8 +29,11 @@
     activeCategory: 'all',
     searchQuery: '',
     isLoading: true,
-    visibleCount: 9,
+    visibleCount: INITIAL_VISIBLE_COUNT,
   };
+
+  // --- Interval ID for cleanup (Fix #20) ---
+  let autoRefreshIntervalId = null;
 
   // --- Notifications State ---
   const notifications = [
@@ -146,6 +166,7 @@
   // --- Initialization ---
   async function init() {
     cacheDom();
+    injectCSRFTokens();
     setupTheme();
     setupEventListeners();
     
@@ -172,11 +193,19 @@
     // Hide loading overlay
     hideLoading();
 
-    // Setup auto-refresh
-    setInterval(async () => {
+    // Setup auto-refresh (Fix #20: store interval ID for cleanup)
+    autoRefreshIntervalId = setInterval(async () => {
       console.log('[App] Auto-refreshing feeds...');
       await loadArticles(true);
-    }, 30 * 60 * 1000);
+    }, AUTO_REFRESH_INTERVAL_MS);
+
+    // Fix #20: Clean up interval on page unload
+    window.addEventListener('beforeunload', () => {
+      if (autoRefreshIntervalId) {
+        clearInterval(autoRefreshIntervalId);
+        autoRefreshIntervalId = null;
+      }
+    });
   }
 
   // --- Theme ---
@@ -243,7 +272,7 @@
       if (DOM.userAvatar) {
         DOM.userAvatar.innerHTML = `
           <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--gradient-accent); color: white; font-weight: 700; font-size: var(--text-base);">
-            ${user.name.charAt(0).toUpperCase()}
+            ${escapeHtml(user.name.charAt(0).toUpperCase())}
           </div>
         `;
       }
@@ -281,7 +310,7 @@
         searchTimeout = setTimeout(() => {
           state.searchQuery = e.target.value.trim();
           renderArticles();
-        }, 300);
+        }, SEARCH_DEBOUNCE_MS);
       });
     }
 
@@ -294,7 +323,7 @@
         DOM.categoryFilters.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         state.activeCategory = pill.dataset.category;
-        state.visibleCount = 9;
+        state.visibleCount = INITIAL_VISIBLE_COUNT;
         renderArticles();
       });
     }
@@ -316,7 +345,7 @@
     // Load more articles
     if (DOM.loadMoreBtn) {
       DOM.loadMoreBtn.addEventListener('click', () => {
-        state.visibleCount += 6;
+        state.visibleCount += LOAD_MORE_INCREMENT;
         renderArticles();
       });
     }
@@ -334,7 +363,7 @@
       if (!scrollTicking) {
         requestAnimationFrame(() => {
           if (DOM.backToTop) {
-            DOM.backToTop.classList.toggle('visible', window.scrollY > 500);
+            DOM.backToTop.classList.toggle('visible', window.scrollY > BACK_TO_TOP_THRESHOLD);
           }
           scrollTicking = false;
         });
@@ -348,8 +377,8 @@
     if (DOM.notificationBtn) {
       DOM.notificationBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        DOM.profileDropdown.classList.remove('active');
-        DOM.notificationDropdown.classList.toggle('active');
+        if (DOM.profileDropdown) DOM.profileDropdown.classList.remove('active');
+        if (DOM.notificationDropdown) DOM.notificationDropdown.classList.toggle('active');
       });
     }
 
@@ -367,8 +396,8 @@
     if (DOM.userAvatar) {
       DOM.userAvatar.addEventListener('click', (e) => {
         e.stopPropagation();
-        DOM.notificationDropdown.classList.remove('active');
-        DOM.profileDropdown.classList.toggle('active');
+        if (DOM.notificationDropdown) DOM.notificationDropdown.classList.remove('active');
+        if (DOM.profileDropdown) DOM.profileDropdown.classList.toggle('active');
       });
     }
 
@@ -377,7 +406,7 @@
       if (DOM.notificationDropdown && !DOM.notificationDropdown.contains(e.target) && e.target !== DOM.notificationBtn) {
         DOM.notificationDropdown.classList.remove('active');
       }
-      if (DOM.profileDropdown && !DOM.profileDropdown.contains(e.target) && !DOM.userAvatar.contains(e.target)) {
+      if (DOM.profileDropdown && DOM.userAvatar && !DOM.profileDropdown.contains(e.target) && !DOM.userAvatar.contains(e.target)) {
         DOM.profileDropdown.classList.remove('active');
       }
     });
@@ -387,7 +416,7 @@
     // Open/Close Create Post Modal
     if (DOM.createPostBtn) {
       DOM.createPostBtn.addEventListener('click', () => {
-        DOM.createPostModal.classList.add('active');
+        if (DOM.createPostModal) DOM.createPostModal.classList.add('active');
       });
     }
 
@@ -399,16 +428,51 @@
       });
     }
 
-    // Submit Create Post Form
+    // Submit Create Post Form (Fix #4: input validation and sanitization)
     if (DOM.createPostForm) {
       DOM.createPostForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        const title = document.getElementById('post-title').value.trim();
-        const summary = document.getElementById('post-summary').value.trim();
-        const category = document.getElementById('post-category').value;
-        const image = document.getElementById('post-image').value.trim() || 'https://images.unsplash.com/photo-1504711434969-e33886168d13?w=600&h=400&fit=crop';
-        const link = document.getElementById('post-link').value.trim() || '#';
+        // CSRF Token Validation (Fix #6)
+        const csrfTokenEl = DOM.createPostForm.querySelector('input[name="csrf_token"]');
+        if (!csrfTokenEl || !window.GPAuth || !GPAuth.validateCSRFToken(csrfTokenEl.value)) {
+          showToast('⚠️', 'Security Error', 'CSRF token is missing or invalid.');
+          return;
+        }
+        
+        const titleEl = document.getElementById('post-title');
+        const summaryEl = document.getElementById('post-summary');
+        const categoryEl = document.getElementById('post-category');
+        const imageEl = document.getElementById('post-image');
+        const linkEl = document.getElementById('post-link');
+
+        if (!titleEl || !summaryEl || !categoryEl) return;
+
+        const title = titleEl.value.trim();
+        const summary = summaryEl.value.trim();
+        const category = categoryEl.value;
+        const image = (imageEl ? imageEl.value.trim() : '') || 'https://images.unsplash.com/photo-1504711434969-e33886168d13?w=600&h=400&fit=crop';
+        const link = (linkEl ? linkEl.value.trim() : '') || '#';
+
+        // Fix #4: Validate input length
+        if (title.length === 0 || title.length > POST_TITLE_MAX_LENGTH) {
+          showToast('⚠️', 'Invalid Title', `Title must be 1-${POST_TITLE_MAX_LENGTH} characters.`);
+          return;
+        }
+        if (summary.length === 0 || summary.length > POST_SUMMARY_MAX_LENGTH) {
+          showToast('⚠️', 'Invalid Summary', `Summary must be 1-${POST_SUMMARY_MAX_LENGTH} characters.`);
+          return;
+        }
+
+        // Validate URL format if provided
+        if (link !== '#' && !isValidUrl(link)) {
+          showToast('⚠️', 'Invalid Link', 'Please enter a valid URL.');
+          return;
+        }
+        if (image !== 'https://images.unsplash.com/photo-1504711434969-e33886168d13?w=600&h=400&fit=crop' && !isValidUrl(image)) {
+          showToast('⚠️', 'Invalid Image URL', 'Please enter a valid image URL.');
+          return;
+        }
 
         const newArticle = {
           title,
@@ -434,7 +498,7 @@
         
         // Success feedback
         showToast('🚀', 'Post Created!', 'Your article was published successfully! +15 points');
-        addNotification('✍️', 'Post Created', `You published "${title.substring(0, 30)}..." (+15 pts)`);
+        addNotification('✍️', 'Post Created', `You published "${escapeHtml(title.substring(0, 30))}..." (+15 pts)`);
 
         // Reset and close
         DOM.createPostForm.reset();
@@ -445,8 +509,8 @@
     // Open Auth Modal from Profile Dropdown or Widgets
     if (DOM.dropdownLoginBtn) {
       DOM.dropdownLoginBtn.addEventListener('click', () => {
-        DOM.profileDropdown.classList.remove('active');
-        DOM.authModal.classList.add('active');
+        if (DOM.profileDropdown) DOM.profileDropdown.classList.remove('active');
+        if (DOM.authModal) DOM.authModal.classList.add('active');
       });
     }
 
@@ -463,17 +527,17 @@
       DOM.tabLogin.addEventListener('click', () => {
         DOM.tabSignup.classList.remove('active');
         DOM.tabLogin.classList.add('active');
-        DOM.authModalTitle.textContent = 'Sign In';
-        DOM.signupForm.style.display = 'none';
-        DOM.loginForm.style.display = 'flex';
+        if (DOM.authModalTitle) DOM.authModalTitle.textContent = 'Sign In';
+        if (DOM.signupForm) DOM.signupForm.style.display = 'none';
+        if (DOM.loginForm) DOM.loginForm.style.display = 'flex';
       });
 
       DOM.tabSignup.addEventListener('click', () => {
         DOM.tabLogin.classList.remove('active');
         DOM.tabSignup.classList.add('active');
-        DOM.authModalTitle.textContent = 'Register';
-        DOM.loginForm.style.display = 'none';
-        DOM.signupForm.style.display = 'flex';
+        if (DOM.authModalTitle) DOM.authModalTitle.textContent = 'Register';
+        if (DOM.loginForm) DOM.loginForm.style.display = 'none';
+        if (DOM.signupForm) DOM.signupForm.style.display = 'flex';
       });
     }
 
@@ -481,14 +545,25 @@
     if (DOM.loginForm) {
       DOM.loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
+
+        // CSRF Token Validation (Fix #6)
+        const csrfTokenEl = DOM.loginForm.querySelector('input[name="csrf_token"]');
+        if (!csrfTokenEl || !window.GPAuth || !GPAuth.validateCSRFToken(csrfTokenEl.value)) {
+          showToast('⚠️', 'Security Error', 'CSRF token is missing or invalid.');
+          return;
+        }
+        const emailEl = document.getElementById('login-email');
+        const passwordEl = document.getElementById('login-password');
+        if (!emailEl || !passwordEl) return;
+
+        const email = emailEl.value;
+        const password = passwordEl.value;
 
         try {
           if (window.GPAuth) {
             await GPAuth.login(email, password);
             DOM.loginForm.reset();
-            DOM.authModal.classList.remove('active');
+            if (DOM.authModal) DOM.authModal.classList.remove('active');
           }
         } catch (error) {
           showToast('⚠️', 'Login Failed', error.message);
@@ -500,15 +575,27 @@
     if (DOM.signupForm) {
       DOM.signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const name = document.getElementById('signup-name').value;
-        const email = document.getElementById('signup-email').value;
-        const password = document.getElementById('signup-password').value;
+
+        // CSRF Token Validation (Fix #6)
+        const csrfTokenEl = DOM.signupForm.querySelector('input[name="csrf_token"]');
+        if (!csrfTokenEl || !window.GPAuth || !GPAuth.validateCSRFToken(csrfTokenEl.value)) {
+          showToast('⚠️', 'Security Error', 'CSRF token is missing or invalid.');
+          return;
+        }
+        const nameEl = document.getElementById('signup-name');
+        const emailEl = document.getElementById('signup-email');
+        const passwordEl = document.getElementById('signup-password');
+        if (!nameEl || !emailEl || !passwordEl) return;
+
+        const name = nameEl.value;
+        const email = emailEl.value;
+        const password = passwordEl.value;
 
         try {
           if (window.GPAuth) {
             await GPAuth.register(name, email, password);
             DOM.signupForm.reset();
-            DOM.authModal.classList.remove('active');
+            if (DOM.authModal) DOM.authModal.classList.remove('active');
           }
         } catch (error) {
           showToast('⚠️', 'Registration Failed', error.message);
@@ -521,7 +608,7 @@
       DOM.dropdownLogoutBtn.addEventListener('click', () => {
         if (window.GPAuth) {
           GPAuth.logout();
-          DOM.profileDropdown.classList.remove('active');
+          if (DOM.profileDropdown) DOM.profileDropdown.classList.remove('active');
         }
       });
     }
@@ -530,12 +617,12 @@
 
     // Auth change listener
     window.addEventListener('gp-auth-change', (e) => {
-      const user = e.detail.user;
+      const user = e.detail ? e.detail.user : null;
       updateAuthUI(user);
       updateEngagementUI();
       if (user) {
-        showToast('🔑', 'Welcome Back!', `Logged in as ${user.name}`);
-        addNotification('🔑', 'Session Started', `Welcome back, ${user.name}!`);
+        showToast('🔑', 'Welcome Back!', `Logged in as ${escapeHtml(user.name)}`);
+        addNotification('🔑', 'Session Started', `Welcome back, ${escapeHtml(user.name)}!`);
       } else {
         showToast('🚪', 'Signed Out', 'You have successfully signed out.');
         addNotification('🚪', 'Session Ended', 'Logged out. Progress is saved locally.');
@@ -623,12 +710,13 @@
       const bookmarked = Engagement.isBookmarked(articleId);
       const isFeatured = index === 0 && state.activeCategory === 'all' && !state.searchQuery;
 
+      // Fix #3 & #7: Use data attributes instead of inline onclick. Article IDs used, not raw indices.
       return `
         <article class="news-card ${isFeatured ? 'featured' : ''}" data-article-id="${articleId}" data-index="${index}">
           <div class="news-card-image">
             <img src="${article.image}" alt="${escapeHtml(article.title)}" loading="lazy"
                  onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168d13?w=600&h=400&fit=crop'">
-            <span class="category-badge ${article.category}">${article.category}</span>
+            <span class="category-badge ${escapeHtml(article.category)}">${escapeHtml(article.category)}</span>
             <span class="source-icon" title="${escapeHtml(article.source)}">${article.sourceIcon || '📰'}</span>
           </div>
           <div class="news-card-body">
@@ -636,25 +724,25 @@
             <p class="news-card-summary">${escapeHtml(article.summary)}</p>
             <div class="news-card-meta">
               <div class="news-card-stats">
-                <button class="news-card-stat ${liked ? 'liked' : ''}" onclick="App.handleLike('${articleId}', this)" aria-label="Like">
+                <button class="news-card-stat ${liked ? 'liked' : ''}" data-action="like" data-article-id="${articleId}" aria-label="Like">
                   <span class="stat-icon">${liked ? '❤️' : '🤍'}</span>
                   <span class="stat-count">${formatCount(article.likes + (liked ? 1 : 0))}</span>
                 </button>
-                <button class="news-card-stat" onclick="App.handleComment('${articleId}')" aria-label="Comment">
+                <button class="news-card-stat" data-action="comment" data-article-id="${articleId}" aria-label="Comment">
                   <span class="stat-icon">💬</span>
                   <span class="stat-count">${formatCount(article.comments)}</span>
                 </button>
               </div>
               <div class="news-card-actions">
-                <button class="news-card-action" onclick="App.handleShare(${index})" aria-label="Share">📤</button>
-                <button class="news-card-action ${bookmarked ? 'bookmarked' : ''}" onclick="App.handleBookmark('${articleId}', ${index}, this)" aria-label="Bookmark">
+                <button class="news-card-action" data-action="share" data-article-id="${articleId}" aria-label="Share">📤</button>
+                <button class="news-card-action ${bookmarked ? 'bookmarked' : ''}" data-action="bookmark" data-article-id="${articleId}" aria-label="Bookmark">
                   ${bookmarked ? '🔖' : '🏷️'}
                 </button>
               </div>
             </div>
             <div class="news-card-time">${RSSEngine.timeAgo(article.pubDate)} · ${escapeHtml(article.source)}</div>
           </div>
-          <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="sr-only" onclick="App.handleRead('${articleId}')">Read full article</a>
+          <a href="${escapeHtml(article.link)}" target="_blank" rel="noopener noreferrer" class="sr-only" data-action="read" data-article-id="${articleId}">Read full article</a>
         </article>
       `;
     }).join('');
@@ -664,19 +752,50 @@
       DOM.loadMoreBtn.style.display = state.visibleCount < articles.length ? 'block' : 'none';
     }
 
-    // Add click handler to open articles
-    DOM.newsGrid.querySelectorAll('.news-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('button') || e.target.closest('a')) return;
-        const index = parseInt(card.dataset.index);
-        const article = articles[index];
-        if (article && article.link && article.link !== '#') {
-          window.open(article.link, '_blank', 'noopener');
-          Engagement.trackRead(card.dataset.articleId);
-          updateEngagementUI();
-        }
-      });
-    });
+    // Fix #3: Use event delegation instead of inline onclick
+    DOM.newsGrid.addEventListener('click', handleNewsGridClick);
+  }
+
+  /**
+   * Event delegation handler for the news grid (Fix #3: replaces inline onclick).
+   * Uses data-action and data-article-id attributes.
+   */
+  function handleNewsGridClick(e) {
+    const actionBtn = e.target.closest('[data-action]');
+    if (actionBtn) {
+      const action = actionBtn.dataset.action;
+      const articleId = actionBtn.dataset.articleId;
+
+      switch (action) {
+        case 'like':
+          handleLike(articleId, actionBtn);
+          return;
+        case 'comment':
+          handleComment(articleId);
+          return;
+        case 'share':
+          handleShareById(articleId);
+          return;
+        case 'bookmark':
+          handleBookmarkById(articleId, actionBtn);
+          return;
+        case 'read':
+          handleRead(articleId);
+          return;
+      }
+    }
+
+    // Click on card (not a button/link) opens article
+    const card = e.target.closest('.news-card');
+    if (card && !e.target.closest('button') && !e.target.closest('a')) {
+      const articleId = card.dataset.articleId;
+      const article = findArticleById(articleId);
+      if (article && article.link && article.link !== '#') {
+        window.open(article.link, '_blank', 'noopener');
+        Engagement.trackRead(articleId);
+        updateEngagementUI();
+      }
+    }
   }
 
   // --- Render Breaking Ticker ---
@@ -689,7 +808,7 @@
     DOM.tickerTrack.innerHTML = items + items;
   }
 
-  // --- Render Trending Sidebar ---
+  // --- Render Trending Sidebar (Fix: escape article.link in onclick → use data attributes) ---
   function renderTrending() {
     if (!DOM.trendingList) return;
 
@@ -698,14 +817,24 @@
       .slice(0, 5);
 
     DOM.trendingList.innerHTML = trending.map((article, i) => `
-      <div class="trending-item" onclick="window.open('${article.link}', '_blank')">
+      <div class="trending-item" data-link="${escapeHtml(article.link)}" role="button" tabindex="0">
         <span class="trending-rank">${i + 1}</span>
         <div class="trending-content">
           <div class="trending-topic">${escapeHtml(article.title)}</div>
-          <div class="trending-posts">${formatCount(article.likes + article.comments)} engagements · ${article.category}</div>
+          <div class="trending-posts">${formatCount(article.likes + article.comments)} engagements · ${escapeHtml(article.category)}</div>
         </div>
       </div>
     `).join('');
+
+    // Fix: Use addEventListener instead of inline onclick for trending items
+    DOM.trendingList.querySelectorAll('.trending-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const link = item.dataset.link;
+        if (link && link !== '#') {
+          window.open(link, '_blank', 'noopener');
+        }
+      });
+    });
   }
 
   // --- Render Reels ---
@@ -720,29 +849,49 @@
         <div class="reel-card" tabindex="0" role="button" aria-label="Play reel: ${escapeHtml(reel.title)}">
           <img src="${reel.image}" alt="${escapeHtml(reel.title)}" loading="lazy">
           <div class="reel-play-btn" aria-hidden="true">▶</div>
-          <span class="reel-badge">🎬 ${reel.duration}</span>
+          <span class="reel-badge">🎬 ${escapeHtml(reel.duration)}</span>
           
           <div class="reel-actions">
-            <button class="reel-action-btn like-btn" onclick="App.handleReelLike(this, event)" aria-label="Like reel">
+            <button class="reel-action-btn like-btn" data-reel-action="like" aria-label="Like reel">
               <span class="icon">🤍</span>
               <span class="count">${likesCount}</span>
             </button>
-            <button class="reel-action-btn comment-btn" onclick="App.handleReelComment(this, event)" aria-label="Comment on reel">
+            <button class="reel-action-btn comment-btn" data-reel-action="comment" aria-label="Comment on reel">
               <span class="icon">💬</span>
               <span class="count">${commentsCount}</span>
             </button>
-            <button class="reel-action-btn share-btn" onclick="App.handleReelShare(this, event)" aria-label="Share reel">
+            <button class="reel-action-btn share-btn" data-reel-action="share" aria-label="Share reel">
               <span class="icon">📤</span>
             </button>
           </div>
 
           <div class="reel-info">
             <div class="reel-title">${escapeHtml(reel.title)}</div>
-            <div class="reel-views">▶ ${reel.views} views</div>
+            <div class="reel-views">▶ ${escapeHtml(reel.views)} views</div>
           </div>
         </div>
       `;
     }).join('');
+
+    // Fix #3: Use event delegation for reel actions instead of inline onclick
+    DOM.reelsContainer.addEventListener('click', (e) => {
+      const actionBtn = e.target.closest('[data-reel-action]');
+      if (!actionBtn) return;
+      e.stopPropagation();
+
+      const action = actionBtn.dataset.reelAction;
+      switch (action) {
+        case 'like':
+          handleReelLike(actionBtn);
+          break;
+        case 'comment':
+          handleReelComment(actionBtn);
+          break;
+        case 'share':
+          handleReelShare(actionBtn);
+          break;
+      }
+    });
   }
 
   // --- Render Products ---
@@ -753,14 +902,14 @@
       <div class="product-card" tabindex="0">
         <div class="product-card-image">
           <img src="${product.image}" alt="${escapeHtml(product.name)}" loading="lazy">
-          <span class="product-discount">${product.discount}</span>
+          <span class="product-discount">${escapeHtml(product.discount)}</span>
           <button class="product-wishlist" aria-label="Add to wishlist">🤍</button>
         </div>
         <div class="product-card-body">
           <div class="product-name">${escapeHtml(product.name)}</div>
           <div class="product-pricing">
-            <span class="product-price">${product.price}</span>
-            <span class="product-original-price">${product.originalPrice}</span>
+            <span class="product-price">${escapeHtml(product.price)}</span>
+            <span class="product-original-price">${escapeHtml(product.originalPrice)}</span>
           </div>
         </div>
       </div>
@@ -773,7 +922,7 @@
         const isActive = btn.textContent.trim() === '❤️';
         btn.textContent = isActive ? '🤍' : '❤️';
         btn.style.transform = 'scale(1.3)';
-        setTimeout(() => { btn.style.transform = ''; }, 200);
+        setTimeout(() => { btn.style.transform = ''; }, ANIMATION_DURATION_MS);
       });
     });
   }
@@ -825,8 +974,16 @@
         DOM.pointsDisplay.innerHTML = `<span style="font-size: var(--text-lg); font-weight: 700; color: var(--text-muted);">🔒 Locked</span><div style="font-size: var(--text-xs); color: var(--text-muted); margin-top: 4px;">Sign in to see points</div>`;
       }
       if (DOM.streakDisplay) {
-        DOM.streakDisplay.innerHTML = `<a href="#" onclick="App.openAuthModal(); return false;" style="color: var(--accent-primary); text-decoration: underline; cursor: pointer;">Sign in to start streak</a>`;
+        DOM.streakDisplay.innerHTML = `<a href="#" class="streak-signin-link" style="color: var(--accent-primary); text-decoration: underline; cursor: pointer;">Sign in to start streak</a>`;
         DOM.streakDisplay.style.color = 'var(--accent-primary)';
+        // Use addEventListener for the streak sign-in link
+        const streakLink = DOM.streakDisplay.querySelector('.streak-signin-link');
+        if (streakLink) {
+          streakLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openAuthModal();
+          });
+        }
       }
       if (DOM.dropdownPointsVal) {
         DOM.dropdownPointsVal.textContent = '🔒';
@@ -840,40 +997,60 @@
     }
   }
 
-  // --- Toast Notifications ---
-  function showToast(icon, title, message, duration = 4000) {
+  // --- Toast Notifications (Fix: complete the broken function) ---
+  function showToast(icon, title, message, duration = TOAST_DEFAULT_DURATION_MS) {
     if (!DOM.toastContainer) return;
 
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerHTML = `
-      <span class="toast-icon">${icon}</span>
+      <div class="toast-icon">${icon}</div>
       <div class="toast-content">
         <div class="toast-title">${escapeHtml(title)}</div>
         <div class="toast-message">${escapeHtml(message)}</div>
       </div>
-      <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+      <button class="toast-close" aria-label="Dismiss">&times;</button>
     `;
+
     DOM.toastContainer.appendChild(toast);
 
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(100px)';
-      setTimeout(() => toast.remove(), 300);
-    }, duration);
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.classList.add('show');
+    });
+
+    // Close button
+    const closeBtn = toast.querySelector('.toast-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => dismissToast(toast));
+    }
+
+    // Auto dismiss
+    setTimeout(() => dismissToast(toast), duration);
   }
 
-  // --- Interaction Handlers (exposed globally) ---
+  function dismissToast(toast) {
+    if (!toast || !toast.parentNode) return;
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    setTimeout(() => {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 300);
+  }
+
+  // --- Interaction Handlers ---
   function handleLike(articleId, btn) {
+    if (!articleId) return;
     const isLiked = Engagement.toggleLike(articleId);
     if (btn) {
       const icon = btn.querySelector('.stat-icon');
       const count = btn.querySelector('.stat-count');
-      icon.textContent = isLiked ? '❤️' : '🤍';
+      if (icon) {
+        icon.textContent = isLiked ? '❤️' : '🤍';
+        icon.style.transform = 'scale(1.4)';
+        setTimeout(() => { icon.style.transform = ''; }, ANIMATION_DURATION_MS);
+      }
       btn.classList.toggle('liked', isLiked);
-      // Animate
-      icon.style.transform = 'scale(1.4)';
-      setTimeout(() => { icon.style.transform = ''; }, 200);
     }
     if (isLiked) {
       showToast('❤️', 'Liked!', '+2 points');
@@ -881,8 +1058,16 @@
     updateEngagementUI();
   }
 
-  function handleBookmark(articleId, articleIndex, btn) {
-    const article = state.articles[articleIndex];
+  /**
+   * Fix #7: Find article by unique ID instead of array index.
+   */
+  function findArticleById(articleId) {
+    if (!articleId) return null;
+    return state.articles.find(a => generateArticleId(a) === articleId) || null;
+  }
+
+  function handleBookmarkById(articleId, btn) {
+    const article = findArticleById(articleId);
     if (!article) return;
 
     const isBookmarked = Engagement.toggleBookmark(articleId, article);
@@ -890,7 +1075,7 @@
       btn.textContent = isBookmarked ? '🔖' : '🏷️';
       btn.classList.toggle('bookmarked', isBookmarked);
       btn.style.transform = 'scale(1.3)';
-      setTimeout(() => { btn.style.transform = ''; }, 200);
+      setTimeout(() => { btn.style.transform = ''; }, ANIMATION_DURATION_MS);
     }
     showToast(
       isBookmarked ? '🔖' : '🏷️',
@@ -900,47 +1085,53 @@
     updateEngagementUI();
   }
 
-  function handleShare(articleIndex) {
-    const article = state.articles[articleIndex];
+  function handleShareById(articleId) {
+    const article = findArticleById(articleId);
     if (!article) return;
 
     // Try native share first
     Engagement.shareArticle(article).then(result => {
       if (!result.success && DOM.shareModal) {
-        const optionsContainer = DOM.shareModal.querySelector('.share-options');
-        if (optionsContainer) {
-          const platforms = ['twitter', 'facebook', 'whatsapp', 'telegram', 'linkedin', 'copy'];
-          const icons = {
-            twitter: '𝕏',
-            facebook: 'f',
-            whatsapp: '📱',
-            telegram: '✈️',
-            linkedin: 'in',
-            copy: '🔗',
-          };
-          const labels = {
-            twitter: 'Twitter',
-            facebook: 'Facebook',
-            whatsapp: 'WhatsApp',
-            telegram: 'Telegram',
-            linkedin: 'LinkedIn',
-            copy: 'Copy Link',
-          };
-          optionsContainer.innerHTML = platforms.map(platform => `
-            <button class="share-option" onclick="App.openShareLink('${platform}', ${articleIndex})">
-              <div class="share-option-icon ${platform}">${icons[platform]}</div>
-              <span class="share-option-label">${labels[platform]}</span>
-            </button>
-          `).join('');
-        }
+        renderShareModal(article, articleId);
         DOM.shareModal.classList.add('active');
       }
     });
     updateEngagementUI();
   }
 
-  function openShareLink(platform, articleIndex) {
-    const article = state.articles[articleIndex];
+  /**
+   * Fix #3: Share modal rendered with addEventListener, not inline onclick.
+   */
+  function renderShareModal(article, articleId) {
+    const optionsContainer = DOM.shareModal ? DOM.shareModal.querySelector('.share-options') : null;
+    if (!optionsContainer) return;
+
+    const platforms = ['twitter', 'facebook', 'whatsapp', 'telegram', 'linkedin', 'copy'];
+    const icons = {
+      twitter: '𝕏', facebook: 'f', whatsapp: '📱',
+      telegram: '✈️', linkedin: 'in', copy: '🔗',
+    };
+    const labels = {
+      twitter: 'Twitter', facebook: 'Facebook', whatsapp: 'WhatsApp',
+      telegram: 'Telegram', linkedin: 'LinkedIn', copy: 'Copy Link',
+    };
+
+    optionsContainer.innerHTML = '';
+    platforms.forEach(platform => {
+      const btn = document.createElement('button');
+      btn.className = 'share-option';
+      btn.innerHTML = `
+        <div class="share-option-icon ${escapeHtml(platform)}">${icons[platform]}</div>
+        <span class="share-option-label">${labels[platform]}</span>
+      `;
+      btn.addEventListener('click', () => {
+        openShareLink(platform, article);
+      });
+      optionsContainer.appendChild(btn);
+    });
+  }
+
+  function openShareLink(platform, article) {
     if (!article) return;
 
     if (platform === 'copy') {
@@ -963,12 +1154,32 @@
   }
 
   function handleRead(articleId) {
+    if (!articleId) return;
     Engagement.trackRead(articleId);
     updateEngagementUI();
   }
 
   // --- Helpers ---
+  function injectCSRFTokens() {
+    if (!window.GPAuth) return;
+    const token = GPAuth.getCSRFToken();
+    const forms = [DOM.loginForm, DOM.signupForm, DOM.createPostForm];
+    forms.forEach(form => {
+      if (form) {
+        const existing = form.querySelector('input[name="csrf_token"]');
+        if (existing) existing.remove();
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'csrf_token';
+        input.value = token;
+        form.appendChild(input);
+      }
+    });
+  }
+
   function generateArticleId(article) {
+    if (!article || !article.title) return '';
     return btoa(unescape(encodeURIComponent(article.title))).substring(0, 20).replace(/[^a-zA-Z0-9]/g, '');
   }
 
@@ -986,11 +1197,28 @@
     return num.toString();
   }
 
-  // --- Reel Engagement Handlers ---
-  function handleReelLike(btn, event) {
-    if (event) event.stopPropagation();
+  /**
+   * Validate URL format (Fix #4: input validation for user posts).
+   */
+  function isValidUrl(str) {
+    try {
+      const url = new URL(str);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
+  function openAuthModal() {
+    if (DOM.authModal) DOM.authModal.classList.add('active');
+  }
+
+  // --- Reel Engagement Handlers (Fix #3: no more inline onclick) ---
+  function handleReelLike(btn) {
     const icon = btn.querySelector('.icon');
     const countSpan = btn.querySelector('.count');
+    if (!icon || !countSpan) return;
+
     const isLiked = btn.classList.contains('liked');
 
     btn.classList.toggle('liked', !isLiked);
@@ -1001,7 +1229,7 @@
 
     // Animate
     icon.style.transform = 'scale(1.4)';
-    setTimeout(() => { icon.style.transform = ''; }, 200);
+    setTimeout(() => { icon.style.transform = ''; }, ANIMATION_DURATION_MS);
 
     if (!isLiked) {
       Engagement.addPoints(2, 'Liked a reel');
@@ -1013,21 +1241,20 @@
     updateEngagementUI();
   }
 
-  function handleReelComment(btn, event) {
-    if (event) event.stopPropagation();
+  function handleReelComment(btn) {
     showToast('💬', 'Reel Comments', 'Comment posted! +15 points');
     
     const countSpan = btn.querySelector('.count');
-    let currentCount = parseInt(countSpan.textContent) || 0;
-    countSpan.textContent = currentCount + 1;
+    if (countSpan) {
+      let currentCount = parseInt(countSpan.textContent) || 0;
+      countSpan.textContent = currentCount + 1;
+    }
     
     Engagement.addPoints(15, 'Commented on a reel');
     updateEngagementUI();
   }
 
-  function handleReelShare(btn, event) {
-    if (event) event.stopPropagation();
-    
+  function handleReelShare(btn) {
     navigator.clipboard.writeText(window.location.href + '#reel').then(() => {
       showToast('🔗', 'Link Copied!', 'Reel share link copied! +20 points');
     }).catch(() => {
@@ -1042,18 +1269,10 @@
   window.App = {
     init,
     handleLike,
-    handleBookmark,
-    handleShare,
     handleComment,
     handleRead,
-    openShareLink,
     showToast,
-    handleReelLike,
-    handleReelComment,
-    handleReelShare,
-    openAuthModal() {
-      if (DOM.authModal) DOM.authModal.classList.add('active');
-    }
+    openAuthModal,
   };
 
   // --- Boot ---
