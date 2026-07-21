@@ -740,7 +740,7 @@
                 </button>
               </div>
             </div>
-            <div class="news-card-time">${RSSEngine.timeAgo(article.pubDate)} · ${escapeHtml(article.source)}</div>
+            <div class="news-card-time">${RSSEngine.timeAgo(article.pubDate)} · <strong>Source:</strong> ${escapeHtml(article.source)}</div>
           </div>
           <a href="${escapeHtml(article.link)}" target="_blank" rel="noopener noreferrer" class="sr-only" data-action="read" data-article-id="${articleId}">Read full article</a>
         </article>
@@ -803,9 +803,16 @@
     if (!DOM.tickerTrack) return;
 
     const breaking = state.articles.slice(0, 8);
-    const items = breaking.map(a => `<span class="ticker-item">${escapeHtml(a.title)}</span>`).join('');
-    // Duplicate for seamless loop
-    DOM.tickerTrack.innerHTML = items + items;
+    
+    // If we have articles, replace the loading placeholder
+    if (breaking.length > 0) {
+      const items = breaking.map(a => `<span class="ticker-item">${escapeHtml(a.title)}</span>`).join('');
+      // Duplicate for seamless loop
+      DOM.tickerTrack.innerHTML = items + items;
+    } else {
+      // Keep the loading state until articles arrive
+      DOM.tickerTrack.innerHTML = '<span class="ticker-item">Loading latest headlines...</span>';
+    }
   }
 
   // --- Render Trending Sidebar (Fix: escape article.link in onclick → use data attributes) ---

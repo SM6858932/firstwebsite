@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Contact GlobalPulse — Get in touch with our team. Send us a message, report issues, or inquire about partnerships and advertising.">
+  <meta name="robots" content="index, follow">
+  <title>Contact Us — GlobalPulse</title>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .contact-page {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+    .contact-page h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    .contact-page .subtitle {
+      color: var(--text-secondary);
+      font-size: var(--text-lg);
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+    .contact-page .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      margin-bottom: 2rem;
+      text-decoration: none;
+    }
+    .contact-page .back-link:hover {
+      color: var(--text-accent);
+    }
+    .contact-page .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .contact-page .contact-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .contact-page .contact-card .icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    .contact-page .contact-card h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-base);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .contact-page .contact-card p {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+    .contact-page .contact-card a {
+      color: var(--text-accent);
+      text-decoration: underline;
+      font-size: var(--text-sm);
+    }
+    .contact-page .contact-card a:hover {
+      color: var(--accent-primary);
+    }
+    .contact-page .contact-form {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .contact-page .contact-form h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .contact-page .contact-form p {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+    .contact-page .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .contact-page .form-group label {
+      display: block;
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+    .contact-page .form-group input,
+    .contact-page .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: var(--text-sm);
+      outline: none;
+      transition: all var(--transition-base);
+    }
+    .contact-page .form-group input:focus,
+    .contact-page .form-group textarea:focus {
+      border-color: var(--accent-primary);
+      background: var(--bg-secondary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+    }
+    .contact-page .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    .contact-page .submit-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--gradient-accent);
+      color: white;
+      font-weight: 600;
+      font-size: var(--text-sm);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-base);
+      cursor: pointer;
+      border: none;
+    }
+    .contact-page .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-glow);
+    }
+    .contact-page .faq-section {
+      margin-top: 2rem;
+    }
+    .contact-page .faq-section h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    .contact-page .faq-item {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .contact-page .faq-item h3 {
+      font-size: var(--text-base);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-accent);
+    }
+    .contact-page .faq-item p {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .contact-page .faq-item a {
+      color: var(--text-accent);
+      text-decoration: underline;
+    }
+    @media (max-width: 640px) {
+      .contact-page { padding: 2rem 1rem 3rem; }
+      .contact-page h1 { font-size: var(--text-2xl); }
+      .contact-page .contact-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">
+        <div class="logo-icon">🌍</div>
+        <span class="logo-text">GlobalPulse</span>
+      </a>
+      <nav style="display:flex; gap:0.25rem; flex:1; justify-content:flex-end; flex-wrap:wrap;">
+        <a href="/" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); text-decoration: none; transition: all var(--transition-fast);">Home</a>
+        <a href="about.html" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); text-decoration: none; transition: all var(--transition-fast);">About</a>
+        <a href="contact.html" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--accent-primary); color: white; text-decoration: none;">Contact</a>
+        <a href="terms-of-service.html" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); text-decoration: none; transition: all var(--transition-fast);">Terms</a>
+        <a href="privacy-policy.html" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); text-decoration: none; transition: all var(--transition-fast);">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="contact-page">
+    <a href="/" class="back-link">← Back to Home</a>
+    
+    <h1>Contact Us</h1>
+    <p class="subtitle">Have a question, feedback, or want to get in touch? We'd love to hear from you.</p>
+
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="icon">📧</div>
+        <h3>Email</h3>
+        <p>General inquiries</p>
+        <a href="mailto:hello@globalpulse.news">hello@globalpulse.news</a>
+        <p style="margin-top:0.5rem;">Support</p>
+        <a href="mailto:support@globalpulse.news">support@globalpulse.news</a>
+      </div>
+      <div class="contact-card">
+        <div class="icon">🐙</div>
+        <h3>GitHub</h3>
+        <p>Report issues or contribute</p>
+        <a href="https://github.com/SM6858932/firstwebsite" target="_blank" rel="noopener">github.com/SM6858932/firstwebsite</a>
+        <p style="margin-top:0.5rem;">Open an issue for bug reports</p>
+      </div>
+      <div class="contact-card">
+        <div class="icon">📢</div>
+        <h3>Advertising</h3>
+        <p>AdSense & partnership inquiries</p>
+        <a href="mailto:ads@globalpulse.news">ads@globalpulse.news</a>
+      </div>
+      <div class="contact-card">
+        <div class="icon">🔒</div>
+        <h3>Privacy</h3>
+        <p>Data protection inquiries</p>
+        <a href="mailto:privacy@globalpulse.news">privacy@globalpulse.news</a>
+      </div>
+    </div>
+
+    <div class="contact-form">
+      <h2>Send Us a Message</h2>
+      <p>Fill out the form below and we'll get back to you as soon as possible.</p>
+      
+      <form id="contact-form" onsubmit="return handleContactForm(event)">
+        <div class="form-group">
+          <label for="contact-name">Your Name</label>
+          <input type="text" id="contact-name" required placeholder="John Doe" maxlength="100">
+        </div>
+        <div class="form-group">
+          <label for="contact-email">Email Address</label>
+          <input type="email" id="contact-email" required placeholder="you@example.com" maxlength="254">
+        </div>
+        <div class="form-group">
+          <label for="contact-subject">Subject</label>
+          <input type="text" id="contact-subject" required placeholder="How can we help?" maxlength="200">
+        </div>
+        <div class="form-group">
+          <label for="contact-message">Message</label>
+          <textarea id="contact-message" required placeholder="Tell us more about your inquiry..." maxlength="2000"></textarea>
+        </div>
+        <button type="submit" class="submit-btn">📨 Send Message</button>
+      </form>
+      <div id="contact-success" style="display:none; text-align:center; padding:2rem;">
+        <div style="font-size:3rem; margin-bottom:1rem;">✅</div>
+        <h3 style="font-family:var(--font-display); font-weight:700; margin-bottom:0.5rem;">Message Sent!</h3>
+        <p style="color:var(--text-secondary);">Thank you for contacting us. We'll respond within 24-48 hours.</p>
+      </div>
+    </div>
+
+    <div class="faq-section">
+      <h2>Frequently Asked Questions</h2>
+      
+      <div class="faq-item">
+        <h3>How do I create an account?</h3>
+        <p>Click the user avatar icon in the top-right corner of the homepage and select "Sign In / Sign Up." You can register with your name, email, and password.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do points and streaks work?</h3>
+        <p>You earn points by reading articles (+5), liking (+2), commenting (+15), sharing (+20), and daily visits (+10). Streaks track consecutive daily visits with bonus points. See the sidebar widget on the homepage for details.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Where does the news come from?</h3>
+        <p>We aggregate headlines and summaries from publicly available RSS feeds of trusted sources including BBC, NY Times, TechCrunch, CNBC, The Verge, and leading Indian publications. We always link back to the original source.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I report a bug or issue?</h3>
+        <p>You can open an issue on our <a href="https://github.com/SM6858932/firstwebsite" target="_blank" rel="noopener">GitHub repository</a> or use the contact form above.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I delete my account?</h3>
+        <p>Contact us at <a href="mailto:support@globalpulse.news">support@globalpulse.news</a> with your account email and we'll process the deletion request within 7 days.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <span>&copy; 2026 GlobalPulse. All rights reserved.</span>
+        <span>
+          <a href="privacy-policy.html" style="color: var(--text-muted); text-decoration: underline; margin-right: 1rem;">Privacy Policy</a>
+          <a href="terms-of-service.html" style="color: var(--text-muted); text-decoration: underline;">Terms of Service</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function handleContactForm(event) {
+      event.preventDefault();
+      document.getElementById('contact-form').style.display = 'none';
+      document.getElementById('contact-success').style.display = 'block';
+      return false;
+    }
+  </script>
+</body>
+
+</html>
+

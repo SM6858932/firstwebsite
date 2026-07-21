@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="About GlobalPulse — Your daily digest of trending news, viral reels, and curated products from around the world. Learn about our mission and team.">
+  <meta name="robots" content="index, follow">
+  <title>About Us — GlobalPulse</title>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .about-page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+    .about-page h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    .about-page .subtitle {
+      color: var(--text-secondary);
+      font-size: var(--text-lg);
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+    .about-page h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-accent);
+    }
+    .about-page p {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 1.2rem;
+    }
+    .about-page ul {
+      padding-left: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .about-page li {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 0.5rem;
+    }
+    .about-page a {
+      color: var(--text-accent);
+      text-decoration: underline;
+    }
+    .about-page a:hover {
+      color: var(--accent-primary);
+    }
+    .about-page .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      margin-bottom: 2rem;
+      text-decoration: none;
+    }
+    .about-page .back-link:hover {
+      color: var(--text-accent);
+    }
+    .about-page .mission-box {
+      background: var(--gradient-card-shine);
+      border: 1px solid rgba(108, 92, 231, 0.2);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .about-page .mission-box .quote {
+      font-size: var(--text-lg);
+      font-weight: 600;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+    .about-page .mission-box .attribution {
+      margin-top: 1rem;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
+    .about-page .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .about-page .feature-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .about-page .feature-card .icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .about-page .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-base);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .about-page .feature-card p {
+      font-size: var(--text-sm);
+      margin-bottom: 0;
+    }
+    .about-page .team-section {
+      margin-top: 3rem;
+    }
+    .about-page .team-member {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,0.04);
+      margin-bottom: 1rem;
+    }
+    .about-page .team-member .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-full);
+      background: var(--gradient-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .about-page .team-member .info h3 {
+      font-size: var(--text-base);
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .about-page .team-member .info .role {
+      color: var(--text-accent);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .about-page .team-member .info p {
+      font-size: var(--text-sm);
+      margin-bottom: 0;
+    }
+    @media (max-width: 640px) {
+      .about-page { padding: 2rem 1rem 3rem; }
+      .about-page h1 { font-size: var(--text-2xl); }
+      .about-page .team-member { flex-direction: column; align-items: center; text-align: center; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">
+        <div class="logo-icon">🌍</div>
+        <span class="logo-text">GlobalPulse</span>
+      </a>
+      <nav style="display:flex; gap:0.25rem; flex:1; justify-content:flex-end; flex-wrap:wrap;">
+        <a href="/" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); text-decoration: none; transition: all var(--transition-fast);">Home</a>
+        <a href="about.html" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--accent-primary); color: white; text-decoration: none;">About</a>
+        <a href="contact.html" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); text-decoration: none; transition: all var(--transition-fast);">Contact</a>
+        <a href="terms-of-service.html" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); text-decoration: none; transition: all var(--transition-fast);">Terms</a>
+        <a href="privacy-policy.html" style="font-size: var(--text-sm); padding: 0.4rem 0.8rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); text-decoration: none; transition: all var(--transition-fast);">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="about-page">
+    <a href="/" class="back-link">← Back to Home</a>
+    
+    <h1>About GlobalPulse</h1>
+    <p class="subtitle">Your intelligent window to the world — curating breaking news, trending stories, and meaningful content from trusted global sources.</p>
+
+    <div class="mission-box">
+      <p class="quote">"Empowering readers with a smarter, faster way to stay informed. We believe quality journalism should be accessible, engaging, and rewarding."</p>
+      <p class="attribution">— The GlobalPulse Team</p>
+    </div>
+
+    <h2>Our Story</h2>
+    <p>GlobalPulse was born from a simple observation: the world is generating more news than ever, but most people don't have time to navigate dozens of different websites to stay informed. Traditional news aggregators either overwhelm you with clutter or provide shallow, context-free headlines.</p>
+    <p>We set out to build something different — a platform that not only brings you the latest headlines from trusted sources around the world but also adds value through curated summaries, context, and engaging features that make staying informed feel rewarding.</p>
+
+    <h2>What Makes GlobalPulse Different</h2>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="icon">🌐</div>
+        <h3>Multi-Source Curation</h3>
+        <p>We aggregate news from 25+ trusted sources across 7 categories — BBC, NY Times, TechCrunch, The Verge, CNBC, and leading Indian publications.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🧠</div>
+        <h3>Smart Summaries</h3>
+        <p>Every article includes a concise 2-line summary so you can grasp the key points before deciding to read the full story.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🎮</div>
+        <h3>Gamified Experience</h3>
+        <p>Earn points, build streaks, and unlock achievements as you read, share, and engage with content. Learning about the world becomes a rewarding habit.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔔</div>
+        <h3>Push Notifications</h3>
+        <p>Get instant alerts when major stories break. Never miss an important update with our OneSignal-powered notification system.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🌍</div>
+        <h3>Global + Local</h3>
+        <p>With smart geolocation, Indian readers see relevant local news prioritized, while global coverage remains comprehensive.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🎬</div>
+        <h3>Trending Reels</h3>
+        <p>Curated visual content from around the web, presented in a scrollable, engaging format for quick entertainment.</p>
+      </div>
+    </div>
+
+    <h2>Our Sources</h2>
+    <p>We source headlines and summaries from publicly available RSS feeds provided by:</p>
+    <ul>
+      <li><strong>International:</strong> BBC News, The New York Times, TechCrunch, The Verge, CNBC</li>
+      <li><strong>India:</strong> NDTV, Times of India, The Hindu, Economic Times, Mint, Gadgets360, Indian Express, Cricbuzz</li>
+    </ul>
+    <p>We always provide clear attribution and links back to original sources. We encourage readers to visit the original articles for full coverage.</p>
+
+    <h2>Original Analysis</h2>
+    <p>Beyond aggregation, we publish original analysis articles that provide deeper insights into the stories shaping our world. These include explainers, trend analysis, and thought leadership pieces that go beyond the headlines. See our <a href="articles/">Articles section</a> for original content.</p>
+
+    <h2>Our Values</h2>
+    <ul>
+      <li><strong>Accuracy:</strong> We source from reputable publications and clearly attribute all content.</li>
+      <li><strong>Transparency:</strong> We clearly distinguish between curated news and original analysis.</li>
+      <li><strong>Privacy:</strong> We respect your data and are transparent about how we use it. See our <a href="privacy-policy.html">Privacy Policy</a>.</li>
+      <li><strong>Engagement:</strong> We believe learning about the world should be an active, rewarding experience.</li>
+    </ul>
+
+    <div class="team-section">
+      <h2>Behind GlobalPulse</h2>
+      
+      <div class="team-member">
+        <div class="avatar">🚀</div>
+        <div class="info">
+          <h3>Founder & Developer</h3>
+          <div class="role">Product & Engineering</div>
+          <p>Passionate about building tools that make information more accessible and engaging. Built GlobalPulse from the ground up with a focus on performance, security, and user experience.</p>
+        </div>
+      </div>
+
+      <div class="team-member">
+        <div class="avatar">✍️</div>
+        <div class="info">
+          <h3>Editorial Team</h3>
+          <div class="role">Content Curation & Analysis</div>
+          <p>Our editors curate the most important stories from global sources and provide original analysis to help readers understand the context behind the headlines.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>Join Our Journey</h2>
+    <p>GlobalPulse is growing, and we'd love to have you along for the ride. Whether you're a reader, a contributor, or a partner, there are many ways to get involved:</p>
+    <ul>
+      <li>⭐ <strong>Bookmark us</strong> and visit daily for your news fix</li>
+      <li>💬 <strong>Engage with content</strong> — like, share, and comment on stories</li>
+      <li>📢 <strong>Spread the word</strong> — share GlobalPulse with friends and colleagues</li>
+      <li>📝 <strong>Write for us</strong> — contact us if you're interested in contributing original content</li>
+      <li>🐛 <strong>Report issues</strong> — find us on GitHub: <a href="https://github.com/SM6858932/firstwebsite" target="_blank" rel="noopener">github.com/SM6858932/firstwebsite</a></li>
+    </ul>
+
+    <p style="margin-top: 2rem; text-align: center;">
+      <a href="contact.html" style="display: inline-block; padding: 0.75rem 2rem; background: var(--gradient-accent); color: white; font-weight: 600; border-radius: var(--radius-full); text-decoration: none; transition: all var(--transition-base);">Get in Touch</a>
+    </p>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <span>&copy; 2026 GlobalPulse. All rights reserved.</span>
+        <span>
+          <a href="privacy-policy.html" style="color: var(--text-muted); text-decoration: underline; margin-right: 1rem;">Privacy Policy</a>
+          <a href="terms-of-service.html" style="color: var(--text-muted); text-decoration: underline;">Terms of Service</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>
+
