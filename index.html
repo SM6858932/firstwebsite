@@ -11,8 +11,9 @@
   <meta name="author" content="GlobalPulse">
   <meta name="theme-color" content="#0a0a0f">
 
-  <!-- Content Security Policy (Fix #15: XSS mitigation) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.onesignal.com https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https://api.rss2json.com https://freeipapi.com https://ipapi.co https://onesignal.com https://*.onesignal.com; font-src 'self' https://fonts.gstatic.com; frame-src https://pagead2.googlesyndication.com;">
+
+<!-- Content Security Policy (updated for Firebase auth + database) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.onesignal.com https://pagead2.googlesyndication.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https://api.rss2json.com https://freeipapi.com https://ipapi.co https://onesignal.com https://*.onesignal.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://*.firebasedatabase.app https://firestore.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://pagead2.googlesyndication.com; worker-src 'self' https://www.gstatic.com;">
 
   <!-- Open Graph -->
   <meta property="og:title" content="GlobalPulse — Live Global News & Trending Content">
@@ -75,6 +76,24 @@
       "query-input": "required name=search_term_string"
     }
   }
+</script>
+
+  <!-- Firebase SDK for Authentication -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyDWqAu6i2Wrx_J22DJLOothihLlIbH5v4I",
+      authDomain: "new-website-for-mon.firebaseapp.com",
+      projectId: "new-website-for-mon",
+      storageBucket: "new-website-for-mon.firebasestorage.app",
+      messagingSenderId: "540760674605",
+      appId: "1:540760674605:web:a150744ba66786e06883a4",
+      measurementId: "G-F3G4EXN0YY"
+    };
+    firebase.initializeApp(firebaseConfig);
   </script>
 </head>
 
