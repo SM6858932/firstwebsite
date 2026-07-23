@@ -33,7 +33,7 @@
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
@@ -76,7 +76,7 @@
       "query-input": "required name=search_term_string"
     }
   }
-  </script>
+</script>
 
   <!-- Firebase SDK for Authentication -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -104,6 +104,7 @@
       <div class="spinner"></div>
       <span class="loading-text">Loading GlobalPulse...</span>
     </div>
+  </div>
 
   <!-- Breaking News Ticker -->
   <div class="breaking-ticker">
@@ -113,6 +114,7 @@
     <div class="ticker-track" id="ticker-track">
       <span class="ticker-item">Loading latest headlines...</span>
     </div>
+  </div>
 
   <!-- Header -->
   <header class="site-header" id="site-header">
@@ -153,7 +155,9 @@
             </div>
             <div class="dropdown-body" id="notification-list">
               <div class="dropdown-empty-state">No new notifications</div>
+            </div>
           </div>
+        </div>
 
         <button class="header-btn" id="create-post-btn" aria-label="Create post">➕</button>
         
@@ -170,15 +174,19 @@
               <div class="profile-dropdown-info">
                 <div class="profile-name" id="dropdown-profile-name">Guest User</div>
                 <div class="profile-email" id="dropdown-profile-email">Sign in to save points</div>
+              </div>
             </div>
             <div class="profile-dropdown-points">
               <div class="points-val" id="dropdown-points-val">0</div>
               <div class="points-lbl">Earned Points</div>
+            </div>
             <div class="dropdown-menu-list">
               <button class="dropdown-menu-item" id="dropdown-login-btn">🔐 Sign In / Sign Up</button>
               <button class="dropdown-menu-item danger" id="dropdown-logout-btn" style="display: none;">🚪 Sign Out</button>
             </div>
+          </div>
         </div>
+      </div>
     </div>
   </header>
 
@@ -196,43 +204,52 @@
         <div class="story-item">
           <div class="story-ring">
             <div class="story-avatar">🌐</div>
+          </div>
           <span class="story-name">World</span>
         </div>
         <div class="story-item">
           <div class="story-ring">
             <div class="story-avatar">💼</div>
+          </div>
           <span class="story-name">Business</span>
         </div>
         <div class="story-item">
           <div class="story-ring">
             <div class="story-avatar">💻</div>
+          </div>
           <span class="story-name">Technology</span>
         </div>
         <div class="story-item">
           <div class="story-ring">
             <div class="story-avatar">⚽</div>
+          </div>
           <span class="story-name">Sports</span>
         </div>
         <div class="story-item">
           <div class="story-ring">
             <div class="story-avatar">🎬</div>
+          </div>
           <span class="story-name">Entertainment</span>
         </div>
         <div class="story-item">
           <div class="story-ring">
             <div class="story-avatar">🏥</div>
+          </div>
           <span class="story-name">Health</span>
         </div>
         <div class="story-item">
           <div class="story-ring">
             <div class="story-avatar">🔬</div>
+          </div>
           <span class="story-name">Science</span>
         </div>
         <div class="story-item">
           <div class="story-ring">
             <div class="story-avatar">🧘</div>
+          </div>
           <span class="story-name">Lifestyle</span>
         </div>
+      </div>
     </div>
   </section>
 
@@ -253,6 +270,7 @@
               <button class="section-nav-btn">New</button>
               <button class="section-nav-btn">Best Sellers</button>
             </div>
+          </div>
 
           <div class="products-grid" id="products-grid">
             <!-- Populated by JS -->
@@ -282,6 +300,7 @@
               <button class="section-nav-btn active" id="sort-latest">Latest</button>
               <button class="section-nav-btn" id="sort-popular">Popular</button>
             </div>
+          </div>
 
           <div class="news-grid" id="news-grid">
             <!-- Populated by JS -->
@@ -303,6 +322,7 @@
               <button class="section-nav-btn active">For You</button>
               <button class="section-nav-btn">Viral</button>
             </div>
+          </div>
 
           <div class="reels-scroll" id="reels-container">
             <!-- Populated by JS -->
@@ -318,6 +338,7 @@
                 <div class="ad-banner-label">Sponsored</div>
                 <div class="ad-banner-title">Earn More with Ads</div>
                 <div class="ad-banner-desc">Monetize your content your way</div>
+              </div>
               <span class="ad-banner-cta primary">Learn More</span>
             </div>
             <div class="ad-banner">
@@ -326,8 +347,10 @@
                 <div class="ad-banner-label">Sponsored</div>
                 <div class="ad-banner-title">Turn Your Passion into Profit</div>
                 <div class="ad-banner-desc">Start your journey today</div>
+              </div>
               <span class="ad-banner-cta secondary">Get Started</span>
             </div>
+          </div>
         </section>
 
 
@@ -351,6 +374,7 @@
           <div id="trending-list">
             <!-- Populated by JS -->
           </div>
+        </div>
 
         <!-- Gamification Widget -->
         <div class="gamification-widget">
@@ -360,6 +384,7 @@
           <div class="points-display">
             <div class="points-number" id="points-display">0</div>
             <div class="points-label">Total Points</div>
+          </div>
           <div class="streak-info" id="streak-display">🔥 0 day streak</div>
           <div class="gamification-actions">
             <div class="gamification-action">
@@ -382,6 +407,7 @@
               <div class="gamification-action-left">🔔 Enable notifications</div>
               <span class="gamification-action-points">+20 pts</span>
             </div>
+          </div>
         </div>
       </aside>
     </div>
@@ -404,6 +430,7 @@
             <a href="#" aria-label="Instagram">📷</a>
             <a href="#" aria-label="YouTube">▶️</a>
           </div>
+        </div>
         <div>
           <h4 class="footer-heading">Categories</h4>
           <nav class="footer-links">
@@ -441,10 +468,12 @@
             <a href="contact.html">DMCA</a>
           </nav>
         </div>
+      </div>
       <div class="footer-bottom">
         <span>&copy; 2026 GlobalPulse. All rights reserved. News sourced via RSS feeds from public sources.</span>
         <span>Built with ❤️ for the global community</span>
       </div>
+    </div>
   </footer>
 
   <!-- Share Modal -->
@@ -457,6 +486,7 @@
       <div class="share-options">
         <!-- Populated by JS -->
       </div>
+    </div>
   </div>
 
   <!-- Create Post Modal -->
@@ -469,6 +499,92 @@
       <form class="modal-form" id="create-post-form" onsubmit="return false;">
         <div class="form-group">
           <label for="post-title">Article Title</label>
-          <input type="text" id="post-title" required placeholder="Enter<execute_command>
-<command><parameter name="command">powershell -Command "Copy-Item 'n:\new website for MON\back of index from git.html' 'n:\new website for MON\index.html' -Force"</parameter></command>
-</execute_command>
+          <input type="text" id="post-title" required placeholder="Enter breaking news title..." maxlength="150">
+        </div>
+        <div class="form-group">
+          <label for="post-summary">2-Line Summary</label>
+          <textarea id="post-summary" rows="2" required placeholder="Enter a brief 2-line summary..." maxlength="300"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="post-category">Category</label>
+          <select id="post-category" required>
+            <option value="world">World</option>
+            <option value="business">Business</option>
+            <option value="technology">Technology</option>
+            <option value="sports">Sports</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="health">Health</option>
+            <option value="science">Science</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="post-image">Image URL (Optional)</label>
+          <input type="url" id="post-image" placeholder="https://images.unsplash.com/photo-...">
+        </div>
+        <div class="form-group">
+          <label for="post-link">Original Source Link (Optional)</label>
+          <input type="url" id="post-link" placeholder="https://news-source.com/...">
+        </div>
+        <button type="submit" class="modal-submit-btn">Post Article & Earn +15 pts</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Authentication Modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="auth-modal-title">Sign In</h3>
+        <button class="modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login">Login</button>
+        <button class="auth-tab" id="tab-signup">Register</button>
+      </div>
+      
+      <!-- Login Form -->
+      <form class="modal-form auth-form" id="login-form" onsubmit="return false;">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" required placeholder="you@example.com" maxlength="254">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" required placeholder="••••••••" maxlength="128">
+        </div>
+        <button type="submit" class="modal-submit-btn">🔐 Sign In</button>
+      </form>
+
+      <!-- Signup Form -->
+      <form class="modal-form auth-form" id="signup-form" style="display: none;" onsubmit="return false;">
+        <div class="form-group">
+          <label for="signup-name">Full Name</label>
+          <input type="text" id="signup-name" required placeholder="John Doe" maxlength="50">
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Email Address</label>
+          <input type="email" id="signup-email" required placeholder="you@example.com" maxlength="254">
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" required placeholder="Choose a password (min 6 chars)" maxlength="128">
+        </div>
+        <button type="submit" class="modal-submit-btn">🚀 Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Back to Top -->
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top">↑</button>
+
+  <!-- Scripts -->
+  <script src="rss-engine.js"></script>
+  <script src="auth.js"></script>
+  <script src="engagement.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
