@@ -1,0 +1,25 @@
+{
+  "name": "new-website-for-mon",
+  "version": "1.0.0",
+  "description": "A modern, engagement-driven news aggregation website that auto-fetches global RSS feeds, showcases trending reels and products, and uses gamification to drive repeat visits.",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://SM6858932@github.com/SM6858932/firstwebsite.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SM6858932/firstwebsite/issues"
+  },
+  "homepage": "https://github.com/SM6858932/firstwebsite#readme",
+  "devDependencies": {}
+}

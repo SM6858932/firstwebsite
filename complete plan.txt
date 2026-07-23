@@ -1,0 +1,55 @@
+
+
+Task 1: 
+on the top bell icon  +icon for post and user profile must working with users data.
+🏆 Your Score
+only works when user sign up or login in website and save all user data indivisually in vercel. check sign with email and password working? and sign up working 
+(ban tempmail to login or sign up) or setup Gmail sign up and sing in only to permanent ban tempmail
+
+check everything working in real world:- 
+
+Live RSS Feeds — Auto-fetches (compulsary Indian news)  from BBC, NYTimes, TechCrunch, CNBC, The Verge, and more as per id addresses individual
+news must show according to user IP addresses
+
+check stories-section :- Category Filtering — World, Business, Technology, Sports, Entertainment, Health, Science showing news according user click on it and show news accodring user interest?
+
+
+Breaking News Ticker — Real-time scrolling headlines at the top of the page 
+
+Trending Reels — Video card carousel showcasing viral content with likes comments and shares 
+
+Product Deals — Curated product showcase with discount badges (this section you need to place between stories-section and Trending now section)
+
+Gamification — Points system for reading, liking, sharing, commenting, and daily streaks (check everything working properly)
+
+Push Notifications — Browser notification support for breaking news alerts through onesignal
+
+OneSignalSDK-v16-ServiceWorker already in files you need to make it run ,(check notification drops on time)
+Dark/Light Mode — Toggle between premium dark and clean light themes its already working
+
+Bookmarks — Save articles to read later (localStorage)
+
+Social Sharing — Share to Twitter, Facebook, WhatsApp, or copy link as per user account who visit website with thumbnail
+
+Responsive Design — Works on mobile check everything perfectly without outbound or hiding scroll content necessorry, tablet, and desktop webview must check
+
+SEO Optimized — Full meta tags, Open Graph, structured data 
+
+ive already applied for google adsense here is code. 
+
+but there is two domain are live so i dont know which one i need to appyly for ads 
+1 https://firstwebsite-alpha-henna.vercel.app/
+2 https://firstwebsite-alpha-liart.vercel.app/
+so which i need to apply for google ads..
+
+after check twice all features implement you need to commit on git and check error through coderabbit also. 
+
+
+Read:--    https://vercel.com/docs/deployments/environments#preview-environment-pre-production
+and i check all 3 domain are live bu there is no changes at all
+i redeploy website but that all 3 domain has a same content no changes has been made yet.
+do you need any extra additional permission to handle vercel or git or one signal? 
+
+In-feed ads
+In-article ads
+Anchor ads later, if needed

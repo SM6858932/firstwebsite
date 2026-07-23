@@ -1,0 +1,581 @@
+.
+
+📄 Copy the full plan below
+markdown
+# 🌐 Complete Website Plan: Social Viral Platform
+
+## 📋 Project Overview
+
+A full-stack Next.js social platform where users can:
+
+- Discover and join WhatsApp, Telegram, Instagram, and Facebook groups
+- Watch viral Instagram reels uploaded by the admin
+- Submit their own reels and groups for admin approval
+- Engage with content through likes, comments, and shares
+
+---
+
+## 🏗️ Website Structure
+
+### Top Bar Navigation
+┌─────────────────────────────────────────────────────────┐
+│ 🔍 Search │ 🌓 Dark Mode │ 👤 Login/Register │
+├─────────────────────────────────────────────────────────┤
+│ 📢 Community │ 📸 Reels │ 📤 Submit │ 📊 Admin │
+└─────────────────────────────────────────────────────────┘
+
+text
+
+---
+
+## 📱 Main Sections
+
+### Section 1: Community Hub (`/community`)
+
+**Four Tabbed Sections:**
+
+| Tab | Content |
+| :--- | :--- |
+| **WhatsApp** | WhatsApp group cards with join links |
+| **Instagram** | Instagram profile cards |
+| **Telegram** | Telegram channel cards |
+| **Facebook** | Facebook group cards |
+
+**Each Group Card Displays:**
+┌──────────────────────────────────────┐
+│ [Cover Image] │
+│ │
+│ 👤 Group/Profile Name │
+│ 📝 Description (truncated) │
+│ 👥 Members: 1,234 │
+│ ✅ Verified Badge (if applicable) │
+│ [Join Button] 🔗 │
+└──────────────────────────────────────┘
+
+text
+
+**User Submission Flow:**
+User fills form
+↓
+┌─────────────────────────────────────┐
+│ Submit Group Form │
+│ - Platform (WhatsApp/Insta/Tele/FB)│
+│ - Name │
+│ - URL/Link │
+│ - Description │
+│ - Image Upload │
+│ - Category │
+└─────────────────────────────────────┘
+↓
+Status: PENDING
+↓
+Admin Dashboard Review
+↓
+Status: APPROVED ✅ or REJECTED ❌
+↓
+Appears on Community Page
+
+text
+
+---
+
+### Section 2: Viral Instagram Reels (`/reels`)
+
+**Admin-Only Upload System:**
+
+**Reel Card Display:**
+┌──────────────────────────────────────┐
+│ [Thumbnail Image] │
+│ │
+│ 👤 @username │
+│ 📝 Caption text... │
+│ ❤️ 1.2K 💬 345 ↗ 678 │
+│ 🏷️ Category: Travel │
+│ ▶ Watch Reel Button │
+│ 🔥 Trending Badge (if applicable) │
+└──────────────────────────────────────┘
+
+text
+
+**Admin Upload Form:**
+┌─────────────────────────────────────────┐
+│ Upload New Reel │
+│ ┌─────────────────────────────────┐ │
+│ │ Instagram Reel URL │ │
+│ │ Thumbnail Image (Upload) │ │
+│ │ Username │ │
+│ │ Caption │ │
+│ │ Likes │ │
+│ │ Comments │ │
+│ │ Shares │ │
+│ │ Category (Dropdown) │ │
+│ │ - Travel │ │
+│ │ - Funny │ │
+│ │ - Gaming │ │
+│ │ - Education │ │
+│ │ - Cars │ │
+│ │ - Business │ │
+│ │ - Other │ │
+│ │ [Publish Reel] │ │
+│ └─────────────────────────────────┘ │
+└─────────────────────────────────────────┘
+
+text
+
+---
+
+### Section 3: User Submission System (`/submit`)
+
+**Two Submission Types:**
+
+| Submission Type | Fields | Workflow |
+| :--- | :--- | :--- |
+| **Submit Reel** | Instagram URL, Thumbnail, Category, Description | User → Pending → Admin Approves → Published |
+| **Submit Group** | Platform, Name, URL, Image, Description | User → Pending → Admin Approves → Published |
+
+---
+
+### Section 4: Admin Dashboard (`/admin`)
+
+**Features:**
+┌─────────────────────────────────────────────────────────┐
+│ 📊 ADMIN DASHBOARD │
+├─────────────────────────────────────────────────────────┤
+│ 📋 Pending Reels: 12 📋 Pending Groups: 8 │
+├─────────────────────────────────────────────────────────┤
+│ ┌─────────────────────────────────────────────────┐ │
+│ │ [Search Bar] [Filter by Status] [Sort by Date] │ │
+│ └─────────────────────────────────────────────────┘ │
+│ │
+│ Reels Tab Groups Tab │
+│ ┌──────────────────────┐ ┌──────────────────────┐ │
+│ │ Reel 1 [Approve][Reject] │ │ Group 1 [Approve][Reject] │
+│ │ Reel 2 [Approve][Reject] │ │ Group 2 [Approve][Reject] │
+│ │ Reel 3 [Approve][Reject] │ │ Group 3 [Approve][Reject] │
+│ │ ... │ │ ... │
+│ └──────────────────────┘ └──────────────────────┘ │
+│ │
+│ [Previous] 1 2 3 4 5 [Next] │
+└─────────────────────────────────────────────────────────┘
+
+text
+
+---
+
+## 🗄️ Database Models
+
+### 1. Reels Table
+
+```sql
+reels
+┌─────────────────────────────────────────────────────────┐
+│ id          | INTEGER  | PRIMARY KEY AUTOINCREMENT    │
+│ username    | TEXT     | NOT NULL                     │
+│ caption     | TEXT     |                               │
+│ thumbnail   | TEXT     | (image URL)                  │
+│ reel_url    | TEXT     | (Instagram URL)              │
+│ likes       | INTEGER  | DEFAULT 0                    │
+│ comments    | INTEGER  | DEFAULT 0                    │
+│ shares      | INTEGER  | DEFAULT 0                    │
+│ category    | TEXT     | (Travel/Funny/Gaming/etc)    │
+│ status      | TEXT     | (pending/approved/rejected)  │
+│ created_at  | DATETIME | DEFAULT CURRENT_TIMESTAMP    │
+│ views       | INTEGER  | DEFAULT 0                    │
+│ trending    | BOOLEAN  | DEFAULT FALSE                │
+└─────────────────────────────────────────────────────────┘
+2. Groups Table
+sql
+groups
+┌─────────────────────────────────────────────────────────┐
+│ id          | INTEGER  | PRIMARY KEY AUTOINCREMENT    │
+│ platform    | TEXT     | (whatsapp/instagram/telegram/facebook) │
+│ name        | TEXT     | NOT NULL                     │
+│ description | TEXT     |                               │
+│ link        | TEXT     | NOT NULL (join URL)          │
+│ image       | TEXT     | (cover image URL)            │
+│ members     | INTEGER  | DEFAULT 0                    │
+│ verified    | BOOLEAN  | DEFAULT FALSE                │
+│ status      | TEXT     | (pending/approved/rejected)  │
+│ created_at  | DATETIME | DEFAULT CURRENT_TIMESTAMP    │
+│ category    | TEXT     |                               │
+└─────────────────────────────────────────────────────────┘
+3. User Submissions Table
+sql
+submissions
+┌─────────────────────────────────────────────────────────┐
+│ id          | INTEGER  | PRIMARY KEY AUTOINCREMENT    │
+│ user_name   | TEXT     | NOT NULL                     │
+│ user_email  | TEXT     | NOT NULL                     │
+│ type        | TEXT     | (reel/group)                 │
+│ content_id  | INTEGER  | (reference to reel/group ID) │
+│ status      | TEXT     | (pending/approved/rejected)  │
+│ submitted_at| DATETIME | DEFAULT CURRENT_TIMESTAMP    │
+│ admin_notes | TEXT     | (for rejection reasons)      │
+└─────────────────────────────────────────────────────────┘
+4. Users Table (Optional for Future)
+sql
+users
+┌─────────────────────────────────────────────────────────┐
+│ id          | INTEGER  | PRIMARY KEY AUTOINCREMENT    │
+│ username    | TEXT     | UNIQUE NOT NULL              │
+│ email       | TEXT     | UNIQUE NOT NULL              │
+│ password    | TEXT     | HASHED                       │
+│ avatar      | TEXT     |                               │
+│ role        | TEXT     | (user/admin) DEFAULT 'user'  │
+│ created_at  | DATETIME | DEFAULT CURRENT_TIMESTAMP    │
+│ followers   | INTEGER  | DEFAULT 0                    │
+└─────────────────────────────────────────────────────────┘
+🎨 UI Components & Features
+Color Scheme (Dark Mode Ready)
+css
+/* Light Mode */
+--background: #ffffff
+--foreground: #1a1a2e
+--card-bg: #f8f9fa
+--primary: #8b5cf6
+--secondary: #6c63ff
+--border: #e5e7eb
+
+/* Dark Mode */
+--background: #0f0f1a
+--foreground: #f0f0f5
+--card-bg: #1a1a2e
+--primary: #a78bfa
+--secondary: #818cf8
+--border: #2d2d44
+Required Components
+Component	Description
+Navbar	Logo, Search, Dark Mode toggle, Navigation links
+Hero Section	Featured content, trending reels
+Card Grid	Responsive grid for reels and groups
+Tab Navigation	Switch between WhatsApp/Instagram/Telegram/Facebook
+Filter Bar	Sort by Trending, Latest, Most Viewed, Most Shared
+Infinite Scroll	Load more content as user scrolls
+Submit Forms	Modal or page-based submission
+Admin Panel	Full CRUD operations with search & filter
+Footer	Links, social media, copyright
+🔧 Technical Specifications
+Tech Stack
+Layer	Technology
+Framework	Next.js 14+ (App Router)
+Database	PostgreSQL / MySQL / MongoDB
+ORM	Prisma / Drizzle
+Styling	Tailwind CSS
+UI Components	Shadcn/ui or custom
+Authentication	NextAuth.js
+Image Optimization	Next.js Image component (lazy loading)
+State Management	Zustand / React Context
+Forms	React Hook Form + Zod
+API	Next.js API Routes
+File Structure
+text
+src/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/
+│   │   └── register/
+│   ├── (dashboard)/
+│   │   ├── admin/
+│   │   │   ├── dashboard/
+│   │   │   ├── reels/
+│   │   │   └── groups/
+│   │   └── submit/
+│   ├── community/
+│   ├── reels/
+│   └── page.tsx (homepage)
+├── components/
+│   ├── ui/
+│   │   ├── Navbar.tsx
+│   │   ├── Footer.tsx
+│   │   ├── ReelCard.tsx
+│   │   ├── GroupCard.tsx
+│   │   └── TabNavigation.tsx
+│   ├── forms/
+│   │   ├── SubmitReelForm.tsx
+│   │   └── SubmitGroupForm.tsx
+│   └── admin/
+│       ├── PendingList.tsx
+│       └── DashboardStats.tsx
+├── lib/
+│   ├── db.ts
+│   └── utils.ts
+├── models/
+│   ├── reel.ts
+│   ├── group.ts
+│   └── submission.ts
+├── types/
+│   └── index.ts
+└── styles/
+    └── globals.css
+📱 API Routes
+Endpoint	Method	Description
+/api/reels	GET	Fetch all approved reels
+/api/reels	POST	Admin uploads new reel
+/api/reels/:id	PUT	Update reel (likes, comments, shares)
+/api/reels/:id	DELETE	Delete reel
+/api/groups	GET	Fetch all approved groups
+/api/groups	POST	User submits new group
+/api/groups/:id	PUT	Admin updates group
+/api/groups/:id	DELETE	Delete group
+/api/submissions	GET	Admin fetches pending submissions
+/api/submissions/:id	PUT	Admin approves/rejects submission
+/api/stats	GET	Admin dashboard statistics
+🔄 Workflow Diagrams
+Reel Submission Flow
+text
+┌─────────────┐
+│   USER      │
+│  Submits    │
+│  Reel URL   │
+└──────┬──────┘
+       ↓
+┌──────────────────────────────────────────────┐
+│           STATUS: PENDING                    │
+│  Data stored in submissions table            │
+│  Admin notified (dashboard notification)     │
+└──────┬───────────────────────────────────────┘
+       ↓
+┌──────────────────────────────────────────────┐
+│           ADMIN REVIEW                       │
+│  Dashboard shows pending reels               │
+│  Admin checks:                               │
+│  - Content quality                           │
+│  - Copyright compliance                      │
+│  - NSFW/Inappropriate content                │
+└──────┬───────────────────────────────────────┘
+       ↓
+┌──────────────────────────────────────────────┐
+│  APPROVED                    REJECTED       │
+│  ┌─────────────────────┐   ┌────────────────┐│
+│  │ Insert into reels   │   │ Send email     ││
+│  │ table with status   │   │ to user with   ││
+│  │ = 'approved'        │   │ reason         ││
+│  │                      │   │                ││
+│  │ Appears on homepage │   │ User can       ││
+│  │ immediately         │   │ resubmit       ││
+│  └─────────────────────┘   └────────────────┘│
+└──────────────────────────────────────────────┘
+Group Submission Flow
+text
+┌─────────────┐
+│   USER      │
+│  Submits    │
+│  Group Link │
+└──────┬──────┘
+       ↓
+┌──────────────────────────────────────────────┐
+│           STATUS: PENDING                    │
+│  Data stored in groups table                 │
+│  status = 'pending'                         │
+└──────┬───────────────────────────────────────┘
+       ↓
+┌──────────────────────────────────────────────┐
+│           ADMIN REVIEW                       │
+│  - Check if group/link is active             │
+│  - No spam or scam content                   │
+│  - Appropriate for platform                  │
+└──────┬───────────────────────────────────────┘
+       ↓
+┌──────────────────────────────────────────────┐
+│  APPROVED                    REJECTED       │
+│  ┌─────────────────────┐   └────────────────┘│
+│  │ status = 'approved'  │                    │
+│  │ Appears in community │                    │
+│  │ section immediately  │                    │
+│  └─────────────────────┘                    │
+└──────────────────────────────────────────────┘
+🎯 Homepage Layout
+text
+┌─────────────────────────────────────────────────────────────┐
+│  🔍 SEARCH  |  🌓 Dark Mode  |  👤 Login  |  📤 Submit   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🏠 HOME  |  👥 COMMUNITY  |  📸 REELS  |  ✨ TRENDING   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────── HERO SECTION ──────────────────────────┐ │
+│  │  🔥 Trending Reels of the Week                        │ │
+│  │  [Big Card] [Big Card] [Big Card]                    │ │
+│  └───────────────────────────────────────────────────────┘ │
+│                                                             │
+│  ┌─────────────── CATEGORIES ────────────────────────────┐ │
+│  │  [Travel] [Funny] [Gaming] [Education] [Cars] [Business] │
+│  └───────────────────────────────────────────────────────┘ │
+│                                                             │
+│  ┌─────────────── LATEST REELS ──────────────────────────┐ │
+│  │  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐             │ │
+│  │  │Reel 1│  │Reel 2│  │Reel 3│  │Reel 4│             │ │
+│  │  └──────┘  └──────┘  └──────┘  └──────┘             │ │
+│  │  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐             │ │
+│  │  │Reel 5│  │Reel 6│  │Reel 7│  │Reel 8│             │ │
+│  │  └──────┘  └──────┘  └──────┘  └──────┘             │ │
+│  └───────────────────────────────────────────────────────┘ │
+│                                                             │
+│  ┌─────────────── TOP CREATORS ──────────────────────────┐ │
+│  │  👤 @creator1  👤 @creator2  👤 @creator3  👤 @creator4 │ │
+│  └───────────────────────────────────────────────────────┘ │
+│                                                             │
+│  ┌─────────────── COMMUNITY SPOTLIGHT ───────────────────┐ │
+│  │  [WhatsApp] [Instagram] [Telegram] [Facebook]        │ │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐           │ │
+│  │  │Group 1   │  │Group 2   │  │Group 3   │           │ │
+│  │  └──────────┘  └──────────┘  └──────────┘           │ │
+│  └───────────────────────────────────────────────────────┘ │
+│                                                             │
+│  📄 FOOTER - About | Contact | Privacy | Terms             │
+└─────────────────────────────────────────────────────────────┘
+⚡ Extra Features Checklist
+Feature	Status
+✅ Trending Badge	Manual/admin set or auto based on views/likes
+✅ Most Viewed	Sort by views count
+✅ Most Shared	Sort by shares count
+✅ New Today	Shows "NEW" badge for reels added today
+✅ Search	Full-text search across reels, groups, and creators
+✅ Filters	Filter reels by category, date, popularity
+✅ Infinite Scroll	Load more as user scrolls
+✅ Dark Mode	Toggle with system preference detection
+✅ Admin Dashboard	Full CRUD, search, filter, pagination
+✅ Approve / Reject	With email notifications to users
+✅ Report Spam	Users can report inappropriate content
+✅ User Profiles	View user's submitted content
+✅ Follow Creator	Users can follow their favorite creators
+✅ Top Creators	Leaderboard based on engagement
+🔗 Important Implementation Notes
+Option A: Manual Upload (Recommended)
+text
+✅ Advantages:
+  - Fast to implement
+  - No API dependency
+  - No legal issues
+  - Works forever
+  - Full control over data
+
+❌ Disadvantages:
+  - Manual updates required
+  - Engagement metrics may become outdated
+Implementation:
+
+Admin manually enters likes, comments, shares
+
+Thumbnail uploaded via form
+
+Reel URL links to Instagram for viewing
+
+Option B: Meta Graph API (Advanced)
+text
+✅ Advantages:
+  - Automatic engagement updates
+  - Real-time metrics
+  - Official Meta integration
+
+❌ Disadvantages:
+  - Facebook Developer Account required
+  - Instagram Business Account required
+  - Access Token with specific permissions
+  - Rate limits
+  - Only supports approved use cases
+Requirements:
+
+Facebook Developer Account
+
+Instagram Business Account
+
+Access Token with instagram_basic and pages_read_engagement permissions
+
+📝 Prompt for AI (Gemini/ChatGPT)
+Copy and paste this prompt into your AI assistant:
+
+text
+Act as a senior Full Stack Next.js developer.
+
+Create a complete social viral platform with the following features:
+
+1. **Community Section** (`/community`)
+   - Four tabs: WhatsApp, Instagram, Telegram, Facebook
+   - Each card shows: cover image, name, description, member count, join button, verified badge
+   - Users can submit groups (pending approval)
+
+2. **Reels Section** (`/reels`)
+   - Admin uploads reels with thumbnail, username, caption, likes, comments, shares, category
+   - Responsive card grid layout
+   - Infinite scroll
+   - Filter by category and popularity
+
+3. **User Submission**
+   - Submit Reel form: Instagram URL, thumbnail, category, description
+   - Submit Group form: platform, name, URL, image, description
+   - Admin approval workflow (pending → approved/rejected)
+
+4. **Admin Dashboard**
+   - Approve/Reject reels and groups
+   - Edit/Delete content
+   - Search, filter, pagination
+
+5. **Tech Stack**
+   - Next.js 14+ (App Router)
+   - Tailwind CSS (fully responsive)
+   - Dark mode toggle
+   - PostgreSQL with Prisma ORM
+   - NextAuth.js for authentication
+   - React Hook Form + Zod for validation
+
+6. **Database Models**
+   - Reels: id, username, caption, thumbnail, reel_url, likes, comments, shares, category, status, created_at
+   - Groups: id, platform, name, description, link, image, members, verified, status, created_at
+   - Submissions: id, user_name, user_email, type, content_id, status, submitted_at
+
+7. **Extra Features**
+   - Trending badge
+   - Most viewed/shared
+   - New today indicator
+   - Search functionality
+   - Infinite scroll
+   - Lazy loading for images
+   - Top Creators section
+
+8. **Important Constraints**
+   - Do NOT use Instagram scraping
+   - Use manual uploads for thumbnails and engagement metrics
+   - Preserve existing website design language
+   - Make it production-ready and SEO-optimized
+
+Generate complete code for all pages, components, API routes, and database schema.
+🚀 Deployment Checklist
+Step	Task
+1	Setup Next.js project with TypeScript
+2	Configure Tailwind CSS with dark mode
+3	Setup PostgreSQL database (Vercel/Neon/Railway)
+4	Install Prisma and define models
+5	Create authentication with NextAuth.js
+6	Build Community page with tabs
+7	Build Reels page with grid
+8	Build Submit forms (Reel + Group)
+9	Build Admin Dashboard
+10	Add search and filter functionality
+11	Implement infinite scroll
+12	Add dark mode toggle
+13	Optimize images with Next.js Image
+14	Add SEO meta tags
+15	Deploy to Vercel
+16	Test all features thoroughly
+17	Submit to Google AdSense
+text
+
+---
+
+### 🖥️ How to Use This File
+
+1. **Copy** the entire content of the code block above.
+2. **Open your text editor** (VS Code, Notepad++, or even Notepad).
+3. **Paste** the content and save the file as **`Website_Plan.md`**.
+4. **Open** this `.md` file in any Markdown viewer or directly in your IDE.
+5. **Give the file to your AI** (Gemini, ChatGPT, Claude) by pasting its content into the chat – the AI will then generate the full codebase for you.
+
+---
+
+### ✅ Benefits of This Plan
+
+- **Comprehensive** – covers all sections, database, UI, and workflows.
+- **AI‑friendly** – structured so that an AI can directly implement it.
+- **Developer‑ready** – includes tech stack, file structure, API routes.
+- **Production‑oriented** – includes SEO, lazy loading, dark mode, and deployment steps.
